@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Old Khiva | Travel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+  <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <img src="old.png" alt="Old Khiva Travel">
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#home" class="nav-link active" data-i18n="navHome">Home</a>
+      <a href="#services" class="nav-link" data-i18n="navServices">Services</a>
+      <a href="#booking" class="nav-link" data-i18n="navBooking">Booking</a>
+      <a href="#contact" class="nav-link" data-i18n="navContact">Contact</a>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang" class="lang-select">
+        <option value="uz">UZ</option>
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+        <option value="tr">TR</option>
+        <option value="de">DE</option>
+      </select>
+    </div>
+    <button class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-section">
+    <div class="hero-content">
+      <h1 data-i18n="title">Old Khiva <span style="color: var(--primary);">Travel</span></h1>
+<p data-i18n="subtitle">Fast & Reliable Taxi Service <br> Book your ride in seconds</p>
+    </div>
+
+    <div class="booking-form">
+      <div class="input-group">
+        <i class="fas fa-map-marker-alt"></i>
+        <input type="text" id="pickup" placeholder="Pickup location" data-i18n-placeholder="pickup" class="form-input"
+          autocomplete="off">
+      </div>
+      <div class="input-group">
+        <i class="fas fa-flag-checkered"></i>
+        <input type="text" id="dropoff" placeholder="Dropoff location" data-i18n-placeholder="dropoff" class="form-input"
+          autocomplete="off">
+      </div>
+      <a href="#services" data-i18n="book" class="book-btn">
+        <i class="fas fa-car"></i> Book Now
+      </a>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services-section">
+    <h2 class="section-title" data-i18n="servicesTitle">Our Taxi Services</h2>
+<p class="section-subtitle" data-i18n="servicesSubtitle">Choose from our popular routes in Khiva and beyond</p>
+
+    <div class="service-grid">
+      <!-- Service 1 -->
+      <div class="service-card" data-delay="100">
+        <div class="service-img img1"></div>
+        <div class="service-content">
+          <h4 data-i18n="s1">Khiva trainstation <i class="fa-solid fa-arrow-right"></i> Ichan Qal'a/Hotel</h4>
+          <p data-i18n="p1" class="price">From 5-10$</p>
+          <a href="booking.html?route=Khiva-trainstation-Ichan-Qala" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 2 -->
+      <div class="service-card" data-delay="200">
+        <div class="service-img img2"></div>
+        <div class="service-content">
+          <h4 data-i18n="s2">Urgench Airport <i class="fa-solid fa-arrow-right"></i> Khiva</h4>
+          <p data-i18n="p2" class="price">From 20-25$</p>
+          <a href="booking.html?route=Urgench-Airport-Khiva" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 3 -->
+      <div class="service-card" data-delay="300">
+        <div class="service-img img3"></div>
+        <div class="service-content">
+          <h4 data-i18n="s3">Urgench trainstation <i class="fa-solid fa-arrow-right"></i> Khiva</h4>
+          <p data-i18n="p3" class="price">From 15-20$</p>
+          <a href="booking.html?route=Urgench-trainstation-Khiva" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 4 -->
+      <div class="service-card" data-delay="400">
+        <div class="service-img img4"></div>
+        <div class="service-content">
+          <h4 data-i18n="s4">Khiva <i class="fa-solid fa-arrow-right"></i> KPP <i
+              class="fa-solid fa-angles-left"></i>Shavat<i class="fa-solid fa-angles-right"></i></h4>
+          <p data-i18n="p4" class="price">From 10-15$</p>
+          <a href="booking.html?route=Khiva-KPP-Shavat" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 5 -->
+      <div class="service-card" data-delay="500">
+        <div class="service-img img5"></div>
+        <div class="service-content">
+          <h4 data-i18n="s5">Khiva <i class="fa-solid fa-arrow-right"></i> Nukus</h4>
+          <p data-i18n="p5" class="price">From 80-100$</p>
+          <a href="booking.html?route=Khiva-Nukus" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 6 -->
+      <div class="service-card" data-delay="600">
+        <div class="service-img img6"></div>
+        <div class="service-content">
+          <h4 data-i18n="s6">Khiva <i class="fa-solid fa-arrow-right"></i> Muynak <i
+              class="fa-solid fa-arrow-right"></i> Nukus</h4>
+          <p data-i18n="p6" class="price">From 150-200$</p>
+          <a href="booking.html?route=Khiva-Muynak-Nukus" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 7 -->
+      <div class="service-card" data-delay="700">
+        <div class="service-img img7"></div>
+        <div class="service-content">
+          <h4 data-i18n="s7">Excursion Ayaz Qal'a, Tupraq Qal'a</h4>
+          <p data-i18n="p7" class="price">From 70-100$</p>
+          <a href="booking.html?route=Excursion" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+
+      <!-- Service 8 -->
+      <div class="service-card" data-delay="800">
+        <div class="service-img img8"></div>
+        <div class="service-content">
+          <h4 data-i18n="s8">Khiva <i class="fa-solid fa-arrow-right"></i> Bukhara</h4>
+          <p data-i18n="p8" class="price">From 120-150$</p>
+          <a href="booking.html?route=Khiva-Bukhara" data-i18n="book" class="service-btn">
+            <i class="fas fa-car"></i> Book now
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cars Section -->
+  <section class="car-services-section">
+<h2 class="section-title" data-i18n="carsTitle">Our Cars</h2>
+<p class="section-subtitle" data-i18n="carsSubtitle">Comfortable and reliable vehicles for your journey</p>
+
+    <div class="car-grid">
+      <!-- Car 1 - Chevrolet Cobalt -->
+      <div class="car-card" data-delay="200">
+        <div class="car-img">
+          <img
+            src="photo_5425081511112806046_y.jpg"
+            alt="Chevrolet Cobalt">
+          <div class="price-badge">x1</div>
+        </div>
+        <div class="car-info">
+          <h4>Chevrolet Cobalt</h4>
+          <p data-i18n="cars.car-padding1">Comfortable and reliable sedan for city and long-distance trips. 4 passengers, AC and safety system
+            included.</p>
+        </div>
+      </div>
+
+      <!-- Car 2 - BYD -->
+      <div class="car-card" data-delay="300">
+        <div class="car-img">
+          <img
+            src="photo_5427380826149687962_m.jpg"
+            alt="BYD">
+          <div class="price-badge">x1.2</div>
+        </div>
+        <div class="car-info">
+          <h4>BYD</h4>
+          <p data-i18n="cars.car-padding2">Modern electric/hybrid vehicle. Comfortable interior, advanced technology for eco-friendly travel.</p>
+        </div>
+      </div>
+
+      <!-- Car 3 - Chevrolet Lacetti -->
+      <div class="car-card" data-delay="400">
+        <div class="car-img">
+          <img
+            src="photo_5427380826149687965_y.jpg"
+            alt="Chevrolet Lacetti">
+          <div class="price-badge">x1.1</div>
+        </div>
+        <div class="car-info">
+          <h4>Chevrolet Lacetti</h4>
+          <p data-i18n="cars.car-padding3">Compact sedan, mid-price segment. Comfortable for city trips, fuel-efficient and reliable.</p>
+        </div>
+      </div>
+
+      <!-- Car 4 - Hyundai H-1 -->
+      <div class="car-card" data-delay="500">
+        <div class="car-img">
+          <img
+            src="photo_5427380826149687964_x.jpg"
+            alt="Hyundai H-1">
+          <div class="price-badge">x1.5</div>
+        </div>
+        <div class="car-info">
+          <h4>HYUNDAI H-1</h4>
+          <p data-i18n="cars.car-padding4">Minivan for big families or group trips. 7-9 passengers, spacious interior for comfortable travel.</p>
+        </div>
+      </div>
+
+      <!-- Car 5 - Chery Tiggo 7 -->
+      <div class="car-card" data-delay="600">
+        <div class="car-img">
+          <img
+            src="photo_5427380826149687963_m.jpg"
+            alt="Chery Tiggo 7">
+          <div class="price-badge">x1.4</div>
+        </div>
+        <div class="car-info">
+          <h4>Chery Tiggo 7 Pro</h4>
+          <p data-i18n="cars.car-padding5">Modern SUV, stable and comfortable drive. Perfect for family trips with spacious interior.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+<h2 class="section-title" data-i18n="contactTitle">Contact Us</h2>
+<p class="section-subtitle" data-i18n="contactText">Get in touch with Old Khiva Travel</p>
+
+    <div class="contact-container">
+      <form id="contactForm" class="contact-form">
+        <div class="input-group">
+          <input type="text" id="name" placeholder="Your Name" data-i18n-placeholder="name" required>
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="input-group">
+          <input type="tel" id="phone" placeholder="Your Phone" data-i18n-placeholder="phone" required>
+          <i class="fas fa-phone"></i>
+        </div>
+        <div class="input-group">
+          <textarea id="message" placeholder="Your Message" data-i18n-placeholder="message" rows="4"></textarea>
+          <i class="fas fa-comment"></i>
+        </div>
+        <button type="submit" data-i18n="send" class="submit-btn">
+          <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+      </form>
+
+      <div class="contact-info">
+        <div class="contact-item">
+          <i class="fas fa-phone"></i>
+          <div>
+            <h3>Phone</h3>
+            <p>+998 93 408 70 20</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <div>
+            <h3>Email</h3>
+            <p>ceo@oldkhiva.uz</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div>
+            <h3>Address</h3>
+            <p>Khiva, Uzbekistan</p>
+            <p>Ichan Qal'a </p>
+          </div>
+        </div>
+
+        <div class="social-media">
+          <h3>Follow Us</h3>
+          <div class="social-icons">
+            <a href="#" class="social-icon">
+              <i class="fab fa-telegram"></i>
+            </a>
+            <a href="#" class="social-icon">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="social-icon">
+              <i class="fab fa-facebook"></i>
+            </a>
+            <a href="#" class="social-icon">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <img src="old.png" alt="Old Khiva Travel">
+        <p>Fast & Reliable Taxi Service in Khiva</p>
+      </div>
+      <div class="footer-links">
+        <h3>Quick Links</h3>
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#booking">Booking</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="footer-contact">
+        <h3>Contact Info</h3>
+        <p><i class="fas fa-phone"></i> +998 93 408 70 20</p>
+        <p><i class="fas fa-envelope"></i> ceo@oldkhiva.uz</p>
+        <p><i class="fas fa-map-marker-alt"></i> Khiva, Uzbekistan</p>
+      </div>
+      <div class="footer-hours">
+        <h3>Working Hours</h3>
+        <p>Monday - Sunday</p>
+        <p>24/7 Available</p>
+      </div>
+    </div>
+    <div class="copyright">
+      <p>&copy; 2026 Old Khiva Travel. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <script src="translations.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Language switcher initialization
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-hide loading screen
+      setTimeout(() => {
+        const loadingScreen = document.querySelector('.loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
+      }, 1000);
+
+      // Initialize language select
+      const langSelect = document.getElementById('lang');
+      if (langSelect) {
+        // Set current language
+        langSelect.value = languageManager.currentLang;
+        
+        // Add change event listener
+        langSelect.addEventListener('change', function(e) {
+          languageManager.setLanguage(e.target.value);
+        });
+      }
+
+      // Force update translations on page load
+      setTimeout(() => {
+        if (window.languageManager) {
+          languageManager.updateTextElements();
+          languageManager.updatePlaceholders();
+        }
+      }, 200);
+
+      // Animate elements on scroll
+      const animateOnScroll = () => {
+        const elements = document.querySelectorAll('.service-card, .car-card, .contact-item');
+
+        elements.forEach(element => {
+          const elementTop = element.getBoundingClientRect().top;
+          const elementVisible = 150;
+
+          if (elementTop < window.innerHeight - elementVisible) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+          }
+        });
+      };
+
+      // Initial check
+      animateOnScroll();
+
+      // Check on scroll
+      window.addEventListener('scroll', animateOnScroll);
+
+      // Add pickup/dropoff autocomplete
+      const pickupInput = document.getElementById('pickup');
+      const dropoffInput = document.getElementById('dropoff');
+
+      if (pickupInput && dropoffInput) {
+        const locations = [
+          "Khiva Train Station",
+          "Urgench Airport",
+          "Urgench Train Station",
+          "Ichan Qal'a",
+          "Hotel",
+          "Bukhara",
+          "Nukus",
+          "Muynak",
+          "KPP Shavat"
+        ];
+
+        // Create datalist for autocomplete
+        const datalist = document.createElement('datalist');
+        datalist.id = 'locations';
+        locations.forEach(location => {
+          const option = document.createElement('option');
+          option.value = location;
+          datalist.appendChild(option);
+        });
+
+        document.body.appendChild(datalist);
+
+        pickupInput.setAttribute('list', 'locations');
+        dropoffInput.setAttribute('list', 'locations');
+      }
+    });
+  </script>
+</body>
+
+</html>
