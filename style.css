@@ -316,6 +316,11 @@ body {
   color: white;
 }
 
+.contact-item div a {
+  color: white;
+  text-decoration: none;
+}
+
 @keyframes bounceIn {
   0% {
     opacity: 0;
