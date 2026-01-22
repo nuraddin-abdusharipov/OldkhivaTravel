@@ -308,6 +308,14 @@ body {
   animation: bounceIn 0.5s ease both;
 }
 
+.input-group input::placeholder{
+  color: white;
+}
+
+.input-group textarea::placeholder{
+  color: white;
+}
+
 @keyframes bounceIn {
   0% {
     opacity: 0;
