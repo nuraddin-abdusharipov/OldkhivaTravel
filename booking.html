@@ -802,53 +802,52 @@ document.addEventListener('keydown', function (e) {
                 name: "Khiva Train Station → Ichan Qal'a",
                 pickup: { lat: 41.377249, lng: 60.376053 },
                 dropoff: { lat: 41.379259, lng: 60.356974 },
-                basePrice: 10
+                basePrice: 5
             },
             "Urgench-Airport-Khiva": {
                 name: "Urgench Airport → Khiva",
                 pickup: { lat: 41.5840, lng: 60.6410 },
                 dropoff: { lat: 41.3789, lng: 60.3615 },
-                basePrice: 25
+                basePrice: 12
             },
             "Urgench-trainstation-Khiva": {
                 name: "Urgench Station → Khiva",
                 pickup: { lat: 41.536914, lng: 60.633076 },
                 dropoff: { lat: 41.379259, lng: 60.356974 },
-                basePrice: 20
+                basePrice: 12
             },
             "Khiva-KPP-Shavat": {
                 name: "Khiva → KPP Shavat",
                 pickup: { lat: 41.3789, lng: 60.3615 },
                 dropoff: { lat: 41.654985, lng: 60.294701 },
-                basePrice: 15
+                basePrice: 30
             },
             "Khiva-Nukus": {
                 name: "Khiva → Nukus",
                 pickup: { lat: 41.3789, lng: 60.3615 },
                 dropoff: { lat: 42.4647, lng: 59.6153 },
-                basePrice: 100
+                basePrice: 50
             },
             "Khiva-Muynak-Nukus": {
                 name: "Khiva → Muynak → Nukus",
                 pickup: { lat: 41.3789, lng: 60.3615 },
                 dropoff: { lat: 43.7686, lng: 59.0214 },
-                basePrice: 200
+                basePrice: 90
             },
             "Excursion": {
                 name: "Excursion: Ayaz Qal'a, Tupraq Qal'a",
                 pickup: { lat: 41.3789, lng: 60.3615 },
                 dropoff: { lat: 42.018596, lng: 61.026362 },
-                basePrice: 100
+                basePrice: 40
             },
             "Khiva-Bukhara": {
                 name: "Khiva → Bukhara",
                 pickup: { lat: 41.3789, lng: 60.3615 },
                 dropoff: { lat: 39.7678, lng: 64.4235 },
-                basePrice: 150
+                basePrice: 70
             }
         };
 
-        // Get route from URL
         const params = new URLSearchParams(window.location.search);
         const slug = params.get("route") || "Khiva-trainstation-Ichan-Qala";
         const routeData = routes[slug];
@@ -862,7 +861,6 @@ document.addEventListener('keydown', function (e) {
         let totalDistance = 0;
         let selectedCar = null;
 
-        // Car data
         const cars = {
             cobalt: { name: "Chevrolet Cobalt", multiplier: 1.0 },
             byd: { name: "BYD", multiplier: 1.31 },
@@ -871,7 +869,6 @@ document.addEventListener('keydown', function (e) {
             chery: { name: "Chery Tiggo 7 Pro", multiplier: 1.31 }
         };
 
-        // Custom icon functions
         function createPickupIcon() {
             const iconDiv = L.divIcon({
                 className: 'custom-marker-div',
@@ -934,7 +931,6 @@ document.addEventListener('keydown', function (e) {
             }
         }
 
-        // Language translations
         const translations = {
             uz: {
                 "Khiva-trainstation-Ichan-Qala": "Xiva temir yo‘l vokzali → Ichan Qal'a",
@@ -1439,28 +1435,27 @@ document.addEventListener('keydown', function (e) {
         }
 
         function updatePrice() {
-            try {
-                const passengersInput = document.getElementById('passengers');
-                const carTypeSelect = document.getElementById('carType');
-                const priceElement = document.getElementById('price');
-                
-                if (!passengersInput || !carTypeSelect || !priceElement) return;
-                
-                const passengers = parseInt(passengersInput.value) || 1;
-                const carId = carTypeSelect.value;
-                const car = cars[carId] || { multiplier: 1.0, name: 'Standard' };
+    const carTypeSelect = document.getElementById('carType');
+    const passengersInput = document.getElementById('passengers');
+    const priceElement = document.getElementById('price');
 
-                const baseRate = routeData.basePrice;
-                const distanceRate = totalDistance * 0.5;
-                const passengerRate = passengers > 4 ? (passengers - 4) * 5 : 0;
-                const carMultiplier = car.multiplier;
+    const basePrice = routeData.basePrice;
+    const passengers = parseInt(passengersInput.value) || 1;
 
-                const totalPrice = (baseRate + distanceRate + passengerRate) * carMultiplier;
-                priceElement.textContent = `$${totalPrice.toFixed(2)}`;
-            } catch (error) {
-                console.error('Error updating price:', error);
-            }
-        }
+    // Har bir yo‘lovchi uchun +1$
+    const passengerExtra = passengers * 1;
+
+    // Mashina multiplier
+    let carMultiplier = 1;
+    if (carTypeSelect.value) {
+        carMultiplier = cars[carTypeSelect.value].multiplier;
+    }
+
+    const finalPrice = (basePrice + passengerExtra) * carMultiplier;
+
+    priceElement.textContent = `$${finalPrice.toFixed(2)}`;
+}
+
 
         function updateSteps(stepNumber) {
             try {
