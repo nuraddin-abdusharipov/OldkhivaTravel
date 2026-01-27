@@ -215,7 +215,6 @@
             }
         }
 
-        /* YANGI: Ikonli marker stillari */
         .custom-marker {
             background: white;
             border-radius: 50%;
@@ -272,7 +271,6 @@
             }
         }
 
-        /* YANGI: Marker popup stillari */
         .leaflet-popup-content-wrapper {
             border-radius: 12px;
             padding: 0;
@@ -454,7 +452,6 @@
                 left: 1rem;
             }
 
-            /* YANGI: Mobil uchun marker moslashuvi */
             .custom-marker {
                 width: 40px;
                 height: 40px;
@@ -530,7 +527,6 @@
             visibility: visible;
         }
 
-        /* Til o'zgartirish uchun */
         .lang-switcher-booking {
             position: fixed;
             top: 100px;
@@ -569,12 +565,10 @@
             }
         }
 
-        /* YANGI: Xarita kontrol elementlari */
         .leaflet-control-container .leaflet-top.leaflet-left {
             margin-top: 100px;
         }
 
-        /* YANGI: Map loading overlay */
         .map-loading {
             position: absolute;
             top: 0;
@@ -711,11 +705,11 @@
                             <option value="" data-i18n="selectCar">Select Car</option>
                             <option value="cobalt" data-price="1.0" data-i18n="carCobalt">Chevrolet Cobalt (x1.0)
                             </option>
-                            <option value="byd" data-price="1.2" data-i18n="carByd">BYD (x1.2)</option>
-                            <option value="lacetti" data-price="1.1" data-i18n="carLacetti">Chevrolet Lacetti (x1.1)
+                            <option value="byd" data-price="1.2" data-i18n="carByd">BYD (x1.31)</option>
+                            <option value="lacetti" data-price="1.1" data-i18n="carLacetti">Chevrolet Lacetti (x1.0)
                             </option>
-                            <option value="hyundai" data-price="1.5" data-i18n="carHyundai">Hyundai H-1 (x1.5)</option>
-                            <option value="chery" data-price="1.4" data-i18n="carChery">Chery Tiggo 7 Pro (x1.4)
+                            <option value="hyundai" data-price="1.5" data-i18n="carHyundai">Hyundai H-1 (x2.24)</option>
+                            <option value="chery" data-price="1.4" data-i18n="carChery">Chery Tiggo 7 Pro (x1.31)
                             </option>
                         </select>
                         <i class="fas fa-car"></i>
@@ -771,10 +765,23 @@
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
     <script>
         // Initialize
+        document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+document.addEventListener('keydown', function (e) {
+  if (
+    e.keyCode === 123 ||  // F12
+    (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
+    (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+    (e.ctrlKey && e.shiftKey && e.keyCode === 74) // Ctrl+Shift+J
+  ) {
+    e.preventDefault();
+  }
+});
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 document.querySelector('.loading-screen').remove();
-            }, 2500);
+            }, 1000);
 
             // Set minimum date to today
             const today = new Date().toISOString().split('T')[0];
@@ -783,8 +790,10 @@
             // Initialize booking
             initBooking();
 
-            // Initialize language
-            initLanguage();
+            // Initialize language - slight delay to ensure DOM is ready
+            setTimeout(() => {
+                initLanguage();
+            }, 300);
         });
 
         // Routes data
@@ -856,13 +865,13 @@
         // Car data
         const cars = {
             cobalt: { name: "Chevrolet Cobalt", multiplier: 1.0 },
-            byd: { name: "BYD", multiplier: 1.2 },
-            lacetti: { name: "Chevrolet Lacetti", multiplier: 1.1 },
-            hyundai: { name: "Hyundai H-1", multiplier: 1.5 },
-            chery: { name: "Chery Tiggo 7 Pro", multiplier: 1.4 }
+            byd: { name: "BYD", multiplier: 1.31 },
+            lacetti: { name: "Chevrolet Lacetti", multiplier: 1.0 },
+            hyundai: { name: "Hyundai H-1", multiplier: 2.24 },
+            chery: { name: "Chery Tiggo 7 Pro", multiplier: 1.31 }
         };
 
-        // YANGI: Custom icon yaratish funksiyalari
+        // Custom icon functions
         function createPickupIcon() {
             const iconDiv = L.divIcon({
                 className: 'custom-marker-div',
@@ -928,6 +937,14 @@
         // Language translations
         const translations = {
             uz: {
+                "Khiva-trainstation-Ichan-Qala": "Xiva temir yo‘l vokzali → Ichan Qal'a",
+                "Urgench-Airport-Khiva": "Urganch aeroporti → Xiva",
+                "Urgench-trainstation-Khiva": "Urganch temir yo‘l vokzali → Xiva",
+                "Khiva-KPP-Shavat": "Xiva → KPP Shovot",
+                "Khiva-Nukus": "Xiva → Nukus",
+                "Khiva-Muynak-Nukus": "Xiva → Mo‘ynoq → Nukus",
+                "Excursion": "Ekskursiya: Ayaz Qal'a, Tuproq Qal'a",
+                "Khiva-Bukhara": "Xiva → Buxoro",
                 taxiBooking: "Taksi bron qilish",
                 bookYourRide: "Avtomobilingizni bron qiling",
                 step1: "Yo'nalish tanlash",
@@ -945,10 +962,10 @@
                 carType: "Avtomobil turi",
                 selectCar: "Avtomobilni tanlang",
                 carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.2)",
-                carLacetti: "Chevrolet Lacetti (x1.1)",
-                carHyundai: "Hyundai H-1 (x1.5)",
-                carChery: "Chery Tiggo 7 Pro (x1.4)",
+                carByd: "BYD (x1.31)",
+                carLacetti: "Chevrolet Lacetti (x1.0)",
+                carHyundai: "Hyundai H-1 (x2.24)",
+                carChery: "Chery Tiggo 7 Pro (x1.31)",
                 numPassengers: "Yo'lovchilar soni",
                 pickupDate: "Olib ketish sanasi",
                 pickupTime: "Olib ketish vaqti",
@@ -963,17 +980,27 @@
                 pickupLabel: "OLIB KETISH",
                 dropoffLabel: "TUSHISH"
             },
+
             ru: {
+                "Khiva-trainstation-Ichan-Qala": "Ж/д вокзал Хивы → Ичан-Кала",
+                "Urgench-Airport-Khiva": "Аэропорт Ургенча → Хива",
+                "Urgench-trainstation-Khiva": "Ж/д вокзал Ургенча → Хива",
+                "Khiva-KPP-Shavat": "Хива → КПП Шават",
+                "Khiva-Nukus": "Хива → Нукус",
+                "Khiva-Muynak-Nukus": "Хива → Муйнак → Нукус",
+                "Excursion": "Экскурсия: Айяз-Кала, Тупрак-Кала",
+                "Khiva-Bukhara": "Хива → Бухара",
+                book:"Аэропорт Ургенча → Хива",
                 taxiBooking: "Бронирование такси",
-                bookYourRide: "Забронируйте поездку",
+                bookYourRide: "Забронируйте ваш автомобиль",
                 step1: "Выбор маршрута",
                 step2: "Личные данные",
                 step3: "Подтверждение",
                 distance: "Расстояние",
                 selectedRoute: "Выбранный маршрут",
                 loadingRoute: "Загрузка маршрута",
-                duration: "Продолжительность",
-                estimatedPrice: "Примерная стоимость",
+                duration: "Длительность",
+                estimatedPrice: "Примерная цена",
                 fullName: "Полное имя",
                 enterFullName: "Введите ваше полное имя",
                 phoneNumber: "Номер телефона",
@@ -981,14 +1008,14 @@
                 carType: "Тип автомобиля",
                 selectCar: "Выберите автомобиль",
                 carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.2)",
-                carLacetti: "Chevrolet Lacetti (x1.1)",
-                carHyundai: "Hyundai H-1 (x1.5)",
-                carChery: "Chery Tiggo 7 Pro (x1.4)",
+                carByd: "BYD (x1.31)",
+                carLacetti: "Chevrolet Lacetti (x1.0)",
+                carHyundai: "Hyundai H-1 (x2.24)",
+                carChery: "Chery Tiggo 7 Pro (x1.31)",
                 numPassengers: "Количество пассажиров",
-                pickupDate: "Дата отправления",
-                pickupTime: "Время отправления",
-                specialInstructions: "Особые указания",
+                pickupDate: "Дата подачи",
+                pickupTime: "Время подачи",
+                specialInstructions: "Особые пожелания",
                 specialInstructionsPlaceholder: "Особые пожелания...",
                 confirmBooking: "Подтвердить бронирование",
                 bookingConfirmed: "Бронирование успешно!",
@@ -996,10 +1023,19 @@
                 selectedCar: "Выбранный автомобиль:",
                 driverContact: "Водитель свяжется с вами",
                 backToHome: "На главную",
-                pickupLabel: "ОТПРАВЛЕНИЕ",
-                dropoffLabel: "ПРИБЫТИЕ"
-            },
+                pickupLabel: "забрать",
+                dropoffLabel: "ВЫСАДКА"
+                },
+
             en: {
+                "Khiva-trainstation-Ichan-Qala": "Khiva railway station → Ichan Qala",
+                "Urgench-Airport-Khiva": "Urgench Airport → Khiva",
+                "Urgench-trainstation-Khiva": "Urgench railway station → Khiva",
+                "Khiva-KPP-Shavat": "Khiva → Shavat checkpoint",
+                "Khiva-Nukus": "Khiva → Nukus",
+                "Khiva-Muynak-Nukus": "Khiva → Muynak → Nukus",
+                "Excursion": "Excursion: Ayaz Qala, Tuproq Qala",
+                "Khiva-Bukhara": "Khiva → Bukhara",
                 taxiBooking: "Taxi Booking",
                 bookYourRide: "Book your ride",
                 step1: "Route Selection",
@@ -1017,10 +1053,10 @@
                 carType: "Car Type",
                 selectCar: "Select Car",
                 carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.2)",
-                carLacetti: "Chevrolet Lacetti (x1.1)",
-                carHyundai: "Hyundai H-1 (x1.5)",
-                carChery: "Chery Tiggo 7 Pro (x1.4)",
+                carByd: "BYD (x1.31)",
+                carLacetti: "Chevrolet Lacetti (x1.0)",
+                carHyundai: "Hyundai H-1 (x2.24)",
+                carChery: "Chery Tiggo 7 Pro (x1.31)",
                 numPassengers: "Number of Passengers",
                 pickupDate: "Pickup Date",
                 pickupTime: "Pickup Time",
@@ -1036,6 +1072,14 @@
                 dropoffLabel: "DROPOFF"
             },
             tr: {
+                "Khiva-trainstation-Ichan-Qala": "Hive tren istasyonu → İçan Kale",
+                "Urgench-Airport-Khiva": "Urgenç Havalimanı → Hive",
+                "Urgench-trainstation-Khiva": "Urgenç tren istasyonu → Hive",
+                "Khiva-KPP-Shavat": "Hive → Şavat kontrol noktası",
+                "Khiva-Nukus": "Hive → Nukus",
+                "Khiva-Muynak-Nukus": "Hive → Moynak → Nukus",
+                "Excursion": "Gezi: Ayaz Kale, Toprak Kale",
+                "Khiva-Bukhara": "Hive → Buhara",
                 taxiBooking: "Taksi Rezervasyonu",
                 bookYourRide: "Yolculuğunuzu rezerve edin",
                 step1: "Rota Seçimi",
@@ -1053,10 +1097,10 @@
                 carType: "Araç Tipi",
                 selectCar: "Araç Seçin",
                 carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.2)",
-                carLacetti: "Chevrolet Lacetti (x1.1)",
-                carHyundai: "Hyundai H-1 (x1.5)",
-                carChery: "Chery Tiggo 7 Pro (x1.4)",
+                carByd: "BYD (x1.31)",
+                carLacetti: "Chevrolet Lacetti (x1.0)",
+                carHyundai: "Hyundai H-1 (x2.24)",
+                carChery: "Chery Tiggo 7 Pro (x1.31)",
                 numPassengers: "Yolcu Sayısı",
                 pickupDate: "Alınma Tarihi",
                 pickupTime: "Alınma Saati",
@@ -1071,8 +1115,15 @@
                 pickupLabel: "ALINMA",
                 dropoffLabel: "VARIS"
             },
-
             de: {
+                "Khiva-trainstation-Ichan-Qala": "Bahnhof Chiwa → Itschan-Kala",
+                "Urgench-Airport-Khiva": "Flughafen Urgentsch → Chiwa",
+                "Urgench-trainstation-Khiva": "Bahnhof Urgentsch → Chiwa",
+                "Khiva-KPP-Shavat": "Chiwa → Grenzposten Schawat",
+                "Khiva-Nukus": "Chiwa → Nukus",
+                "Khiva-Muynak-Nukus": "Chiwa → Muynak → Nukus",
+                "Excursion": "Ausflug: Ayaz-Kala, Tuproq-Kala",
+                "Khiva-Bukhara": "Chiwa → Buchara",
                 taxiBooking: "Taxi Buchung",
                 bookYourRide: "Buchen Sie Ihre Fahrt",
                 step1: "Streckenauswahl",
@@ -1090,10 +1141,10 @@
                 carType: "Autotyp",
                 selectCar: "Auto auswählen",
                 carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.2)",
-                carLacetti: "Chevrolet Lacetti (x1.1)",
-                carHyundai: "Hyundai H-1 (x1.5)",
-                carChery: "Chery Tiggo 7 Pro (x1.4)",
+                carByd: "BYD (x1.31)",
+                carLacetti: "Chevrolet Lacetti (x1.0)",
+                carHyundai: "Hyundai H-1 (x2.24)",
+                carChery: "Chery Tiggo 7 Pro (x1.31)",
                 numPassengers: "Anzahl der Passagiere",
                 pickupDate: "Abholdatum",
                 pickupTime: "Abholzeit",
@@ -1116,56 +1167,93 @@
 
             if (langSelect) {
                 langSelect.value = savedLang;
-                setLanguage(savedLang);
+                
+                // Safe language set with delay
+                setTimeout(() => {
+                    safeSetLanguage(savedLang);
+                }, 100);
 
                 langSelect.addEventListener('change', (e) => {
-                    setLanguage(e.target.value);
+                    safeSetLanguage(e.target.value);
                     localStorage.setItem('bookingLang', e.target.value);
                 });
             }
         }
 
-        function setLanguage(lang) {
+        function safeSetLanguage(lang) {
+            try {
+                const langData = translations[lang] || translations['en'];
+                
+                console.log('Setting language to:', lang);
+                
+                // Update text elements safely
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    if (element && element.nodeType === 1) { // Check if it's an element node
+                        const key = element.getAttribute('data-i18n');
+                        if (key && langData[key] && element.textContent !== undefined) {
+                            element.textContent = langData[key];
+                        }
+                    }
+                });
+
+                // Update placeholders
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                    if (element) {
+                        const key = element.getAttribute('data-i18n-placeholder');
+                        if (key && langData[key]) {
+                            element.setAttribute('placeholder', langData[key]);
+                        }
+                    }
+                });
+
+                // Update select options
+                updateSelectOptions(lang);
+                
+                // Update marker labels
+                updateMarkerLabels(lang);
+                
+            } catch (error) {
+                console.error('Error setting language:', error);
+            }
+        }
+
+        function updateSelectOptions(lang) {
             const langData = translations[lang] || translations['en'];
-
-            // Update all elements with data-i18n
-            document.querySelectorAll('[data-i18n]').forEach(element => {
-                const key = element.getAttribute('data-i18n');
-                if (langData[key]) {
-                    element.textContent = langData[key];
+            const carTypeSelect = document.getElementById('carType');
+            
+            if (carTypeSelect && carTypeSelect.options) {
+                for (let option of carTypeSelect.options) {
+                    const i18nKey = option.getAttribute('data-i18n');
+                    if (i18nKey && langData[i18nKey]) {
+                        option.textContent = langData[i18nKey];
+                    }
                 }
-            });
-
-            // Update placeholders
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-                const key = element.getAttribute('data-i18n-placeholder');
-                if (langData[key]) {
-                    element.setAttribute('placeholder', langData[key]);
-                }
-            });
-
-            // YANGI: Marker label'larni yangilash
-            updateMarkerLabels(lang);
+            }
         }
 
         function updateMarkerLabels(lang) {
-            const langData = translations[lang] || translations['en'];
-
-            // Pickup marker label'ini yangilash
-            const pickupMarkers = document.querySelectorAll('.marker-label');
-            if (pickupMarkers.length > 0) {
-                pickupMarkers[0].textContent = langData.pickupLabel || 'PICKUP';
-            }
-
-            // Dropoff marker label'ini yangilash
-            if (pickupMarkers.length > 1) {
-                pickupMarkers[1].textContent = langData.dropoffLabel || 'DROPOFF';
+            try {
+                const langData = translations[lang] || translations['en'];
+                const pickupMarkers = document.querySelectorAll('.marker-label');
+                
+                if (pickupMarkers.length > 0) {
+                    pickupMarkers[0].textContent = langData.pickupLabel || 'PICKUP';
+                }
+                
+                if (pickupMarkers.length > 1) {
+                    pickupMarkers[1].textContent = langData.dropoffLabel || 'DROPOFF';
+                }
+            } catch (error) {
+                console.error('Error updating marker labels:', error);
             }
         }
 
         function initBooking() {
             // Update UI
-            document.getElementById('routeName').innerHTML = `<i class="fas fa-route"></i> ${routeData.name}`;
+            const routeNameElement = document.getElementById('routeName');
+            if (routeNameElement) {
+                routeNameElement.innerHTML = `<i class="fas fa-route"></i> ${routeData.name}`;
+            }
 
             // Initialize map
             initMap();
@@ -1176,16 +1264,25 @@
             // Set default time to next hour
             const now = new Date();
             const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
-            document.getElementById('time').value = `${nextHour.getHours().toString().padStart(2, '0')}:${nextHour.getMinutes().toString().padStart(2, '0')}`;
+            const timeInput = document.getElementById('time');
+            if (timeInput) {
+                timeInput.value = `${nextHour.getHours().toString().padStart(2, '0')}:${nextHour.getMinutes().toString().padStart(2, '0')}`;
+            }
 
             // Car selection event
-            document.getElementById('carType').addEventListener('change', function () {
-                selectedCar = cars[this.value];
-                updatePrice();
-            });
+            const carTypeSelect = document.getElementById('carType');
+            if (carTypeSelect) {
+                carTypeSelect.addEventListener('change', function () {
+                    selectedCar = cars[this.value];
+                    updatePrice();
+                });
+            }
 
             // Passengers event
-            document.getElementById('passengers').addEventListener('input', updatePrice);
+            const passengersInput = document.getElementById('passengers');
+            if (passengersInput) {
+                passengersInput.addEventListener('input', updatePrice);
+            }
         }
 
         function initMap() {
@@ -1206,7 +1303,7 @@
                 minZoom: 3
             }).addTo(map);
 
-            // YANGI: Custom ikonlar bilan markerlarni yaratish
+            // Create custom icons
             const pickupIcon = createPickupIcon();
             const dropoffIcon = createDropoffIcon();
 
@@ -1222,7 +1319,7 @@
                 { icon: dropoffIcon }
             ).addTo(map);
 
-            // YANGI: Custom popup'lar
+            // Create popups
             const pickupPopup = L.popup({
                 className: 'custom-popup-wrapper',
                 maxWidth: 300,
@@ -1237,11 +1334,11 @@
                 closeButton: true
             }).setContent(createPopupContent('dropoff', routeData.dropoff));
 
-            // Popup'lar bilan bog'lash
+            // Bind popups
             pickupMarker.bindPopup(pickupPopup);
             dropoffMarker.bindPopup(dropoffPopup);
 
-            // Add routing with custom style
+            // Add routing control
             routingControl = L.Routing.control({
                 waypoints: [
                     L.latLng(routeData.pickup.lat, routeData.pickup.lng),
@@ -1262,13 +1359,6 @@
                 },
                 createMarker: () => null,
                 showAlternatives: false,
-                altLineOptions: {
-                    styles: [
-                        { color: 'black', opacity: 0.15, weight: 9 },
-                        { color: 'white', opacity: 0.8, weight: 6 },
-                        { color: '#ff6b35', opacity: 1, weight: 3 }
-                    ]
-                },
                 fitSelectedRoutes: false,
                 language: 'en',
                 units: 'metric'
@@ -1282,17 +1372,32 @@
 
                 // Update UI
                 const distanceText = `${totalDistance.toFixed(2)} km`;
-                document.getElementById('distance').innerHTML = `<i class="fas fa-road"></i> <span data-i18n="distance">Distance</span>: ${distanceText}`;
-                document.getElementById('routeDistance').innerHTML = `<i class="fas fa-road"></i> <span data-i18n="distance">Distance</span>: ${distanceText}`;
-                document.getElementById('routeDuration').innerHTML = `<i class="fas fa-clock"></i> <span data-i18n="duration">Duration</span>: ${duration} mins`;
+                const distanceElement = document.getElementById('distance');
+                const routeDistanceElement = document.getElementById('routeDistance');
+                const routeDurationElement = document.getElementById('routeDuration');
+                
+                if (distanceElement) {
+                    distanceElement.innerHTML = `<i class="fas fa-road"></i> <span data-i18n="distance">Distance</span>: ${distanceText}`;
+                }
+                
+                if (routeDistanceElement) {
+                    routeDistanceElement.innerHTML = `<i class="fas fa-road"></i> <span data-i18n="distance">Distance</span>: ${distanceText}`;
+                }
+                
+                if (routeDurationElement) {
+                    routeDurationElement.innerHTML = `<i class="fas fa-clock"></i> <span data-i18n="duration">Duration</span>: ${duration} mins`;
+                }
 
                 // Hide loading overlay
-                document.getElementById('mapLoading').style.display = 'none';
+                const mapLoading = document.getElementById('mapLoading');
+                if (mapLoading) {
+                    mapLoading.style.display = 'none';
+                }
 
                 // Calculate and update price
                 updatePrice();
 
-                // Fit map to route with padding
+                // Fit map to route
                 const bounds = L.latLngBounds([
                     [routeData.pickup.lat, routeData.pickup.lng],
                     [routeData.dropoff.lat, routeData.dropoff.lng]
@@ -1306,10 +1411,17 @@
             // Handle errors
             routingControl.on('routingerror', (e) => {
                 console.error('Routing error:', e.error);
-                document.getElementById('distance').textContent = 'Route calculation failed';
-                document.getElementById('mapLoading').style.display = 'none';
+                const distanceElement = document.getElementById('distance');
+                if (distanceElement) {
+                    distanceElement.textContent = 'Route calculation failed';
+                }
+                
+                const mapLoading = document.getElementById('mapLoading');
+                if (mapLoading) {
+                    mapLoading.style.display = 'none';
+                }
 
-                // Fit map to markers if routing fails
+                // Fit map to markers
                 const bounds = L.latLngBounds([
                     [routeData.pickup.lat, routeData.pickup.lng],
                     [routeData.dropoff.lat, routeData.dropoff.lng]
@@ -1319,36 +1431,107 @@
 
             // Auto hide loading after timeout
             setTimeout(() => {
-                document.getElementById('mapLoading').style.display = 'none';
+                const mapLoading = document.getElementById('mapLoading');
+                if (mapLoading) {
+                    mapLoading.style.display = 'none';
+                }
             }, 5000);
         }
 
         function updatePrice() {
-            const passengers = parseInt(document.getElementById('passengers').value) || 1;
-            const carSelect = document.getElementById('carType');
-            const carId = carSelect.value;
-            const car = cars[carId] || { multiplier: 1.0, name: 'Standard' };
+            try {
+                const passengersInput = document.getElementById('passengers');
+                const carTypeSelect = document.getElementById('carType');
+                const priceElement = document.getElementById('price');
+                
+                if (!passengersInput || !carTypeSelect || !priceElement) return;
+                
+                const passengers = parseInt(passengersInput.value) || 1;
+                const carId = carTypeSelect.value;
+                const car = cars[carId] || { multiplier: 1.0, name: 'Standard' };
 
-            const baseRate = routeData.basePrice;
-            const distanceRate = totalDistance * 0.5;
-            const passengerRate = passengers > 4 ? (passengers - 4) * 5 : 0;
-            const carMultiplier = car.multiplier;
+                const baseRate = routeData.basePrice;
+                const distanceRate = totalDistance * 0.5;
+                const passengerRate = passengers > 4 ? (passengers - 4) * 5 : 0;
+                const carMultiplier = car.multiplier;
 
-            const totalPrice = (baseRate + distanceRate + passengerRate) * carMultiplier;
-            document.getElementById('price').textContent = `$${totalPrice.toFixed(2)}`;
+                const totalPrice = (baseRate + distanceRate + passengerRate) * carMultiplier;
+                priceElement.textContent = `$${totalPrice.toFixed(2)}`;
+            } catch (error) {
+                console.error('Error updating price:', error);
+            }
         }
 
         function updateSteps(stepNumber) {
-            document.querySelectorAll('.step').forEach((step, index) => {
-                if (index < stepNumber) {
-                    step.classList.add('active');
-                } else {
-                    step.classList.remove('active');
-                }
-            });
+            try {
+                const steps = document.querySelectorAll('.step');
+                steps.forEach((step, index) => {
+                    if (index < stepNumber) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating steps:', error);
+            }
         }
 
-        // Event Listeners
+        // Telegram send function - UPDATED WITH WORKING BOT
+        async function sendToTelegram(formData) {
+            // Replace with your actual bot token and chat ID
+            const botToken = "8529581902:AAHBxCsvUYa8WT5y-i2AFCmeAmYNhwOha7w";
+            const chatId = "7579886970";
+            
+            const message = `
+🚖 *YANGI BRON*
+━━━━━━━━━━━━━━━━
+📍 *Yo'nalish:* ${formData.route}
+📏 *Masofa:* ${formData.distance} km
+💰 *Narx:* ${formData.price}
+🚗 *Mashina:* ${formData.car}
+📊 *Ko'paytiruvchi:* x${formData.carMultiplier}
+👤 *Ism:* ${formData.name}
+📞 *Telefon:* ${formData.phone}
+📧 *Email:* ${formData.email || 'Kiritilmagan'}
+👥 *Yo'lovchilar:* ${formData.passengers}
+📅 *Sana:* ${formData.date}
+⏰ *Vaqt:* ${formData.time}
+📝 *Eslatma:* ${formData.notes || 'Yo\'q'}
+━━━━━━━━━━━━━━━━
+`.trim();
+
+            console.log('Sending to Telegram:', message);
+            
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                const responseData = await response.json();
+                console.log('Telegram response:', responseData);
+
+                if (!response.ok) {
+                    throw new Error(responseData.description || 'Telegram API error');
+                }
+
+                return responseData;
+            } catch (error) {
+                console.error('Telegram send error:', error);
+                throw error;
+            }
+        }
+
+        // Form submit handler
         document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -1373,9 +1556,6 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitBtn.disabled = true;
 
-            // Simulate processing
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
             // Get form data
             const formData = {
                 name: document.getElementById('name').value,
@@ -1393,58 +1573,29 @@
             };
 
             // Update selected car in success message
-            document.getElementById('selectedCarName').textContent = formData.car;
+            const selectedCarName = document.getElementById('selectedCarName');
+            if (selectedCarName) {
+                selectedCarName.textContent = formData.car;
+            }
 
-            // Send to Telegram
             try {
-                const botToken = "8529581902:AAHBxCsvUYa8WT5y-i2AFCmeAmYNhwOha7w";
-                const chatId = "7579886970";
-                const message = `
-🚖 *NEW BOOKING*
-━━━━━━━━━━━━━━━━
-📍 *Route:* ${formData.route}
-📏 *Distance:* ${formData.distance} km
-💰 *Price:* ${formData.price}
-🚗 *Car:* ${formData.car}
-📊 *Multiplier:* x${formData.carMultiplier}
-👤 *Name:* ${formData.name}
-📞 *Phone:* ${formData.phone}
-📧 *Email:* ${formData.email || 'Not provided'}
-👥 *Passengers:* ${formData.passengers}
-📅 *Date:* ${formData.date}
-⏰ *Time:* ${formData.time}
-📝 *Notes:* ${formData.notes || 'None'}
-━━━━━━━━━━━━━━━━
-`.trim();
-
-                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message,
-                        parse_mode: 'Markdown'
-                    })
-                });
-
-                if (response.ok) {
-                    // Show success message
-                    document.getElementById('overlay').classList.add('show');
-                    document.getElementById('successMessage').classList.add('show');
-                    // Update to step 3
-                    updateSteps(3);
-                } else {
-                    throw new Error('Failed to send booking');
-                }
+                // Send to Telegram
+                await sendToTelegram(formData);
+                
+                // Show success message
+                document.getElementById('overlay').classList.add('show');
+                document.getElementById('successMessage').classList.add('show');
+                updateSteps(3);
+                
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Booking error:', error);
                 const currentLang = localStorage.getItem('bookingLang') || 'en';
                 const errorMessages = {
-                    uz: 'Bron yuborishda xatolik. Iltimos, qayta urinib ko\'ring.',
-                    ru: 'Ошибка при отправке бронирования. Пожалуйста, попробуйте еще раз.',
-                    en: 'Failed to send booking. Please try again.',
-                    tr: 'Rezervasyon gönderilirken hata oluştu. Lütfen tekrar deneyin.',
-                    de: 'Fehler beim Senden der Buchung. Bitte versuchen Sie es erneut.'
+                    uz: 'Bron yuborishda xatolik. Iltimos, qayta urinib ko\'ring yoki telefon orqali bog\'laning.',
+                    ru: 'Ошибка при отправке бронирования. Пожалуйста, попробуйте еще раз или свяжитесь по телефону.',
+                    en: 'Failed to send booking. Please try again or contact us by phone.',
+                    tr: 'Rezervasyon gönderilirken hata oluştu. Lütfen tekrar deneyin veya telefonla bize ulaşın.',
+                    de: 'Fehler beim Senden der Buchung. Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.'
                 };
                 alert(errorMessages[currentLang]);
             } finally {
@@ -1474,27 +1625,39 @@
         // Add keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'Enter') {
-                document.getElementById('bookingForm').dispatchEvent(new Event('submit'));
+                const bookingForm = document.getElementById('bookingForm');
+                if (bookingForm) {
+                    bookingForm.dispatchEvent(new Event('submit'));
+                }
             }
         });
 
-        // YANGI: Xaritaga klik qilganda zoom qilish
-        map.on('click', function (e) {
-            map.setView(e.latlng, map.getZoom() + 1);
-        });
-
-        // YANGI: Markerlarga hover effekt
-        map.on('mouseover', function (e) {
-            if (e.originalEvent.target.closest('.custom-marker')) {
-                e.originalEvent.target.closest('.custom-marker').style.transform = 'scale(1.1)';
+        // Test function for Telegram bot
+        window.testTelegramBot = async function() {
+            const testData = {
+                route: "Test Route",
+                distance: "10.5",
+                price: "$25.00",
+                car: "Test Car",
+                carMultiplier: "1.0",
+                name: "Test Name",
+                phone: "+998901234567",
+                email: "test@example.com",
+                passengers: "2",
+                date: "2024-12-22",
+                time: "14:30",
+                notes: "Test booking"
+            };
+            
+            try {
+                const result = await sendToTelegram(testData);
+                alert("Test message sent successfully!");
+                console.log("Test success:", result);
+            } catch (error) {
+                alert("Test failed: " + error.message);
+                console.error("Test error:", error);
             }
-        });
-
-        map.on('mouseout', function (e) {
-            if (e.originalEvent.target.closest('.custom-marker')) {
-                e.originalEvent.target.closest('.custom-marker').style.transform = 'scale(1)';
-            }
-        });
+        }
     </script>
 </body>
 
