@@ -680,8 +680,7 @@
                     </p>
                     <p id="routeDuration"><i class="fas fa-clock"></i> <span data-i18n="duration">Duration</span>: --
                         mins</p>
-                    <p id="routeStopover"><i class="fas fa-pause-circle"></i> <span
-                            data-i18n="stopover">Stopover</span>: <span id="stopoverName">--</span></p>
+                    <p id="routeStopover"><i class="fas fa-pause-circle"></i> <span data-i18n="stopover">Stopover</span>: <span id="stopoverName">--</span></p>
                 </div>
 
                 <div class="price-estimate">
@@ -775,987 +774,987 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
     <script>
-        // Initialize security
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
+      // Initialize security
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (
+        e.keyCode === 123 ||  // F12
+        (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
+        (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+        (e.ctrlKey && e.shiftKey && e.keyCode === 74) // Ctrl+Shift+J
+    ) {
+        e.preventDefault();
+    }
+});
+
+// Global variables
+let map, routingControl;
+let totalDistance = 0;
+let totalDuration = 0;
+
+// Routes data with full translations
+const routes = {
+    "Khiva-trainstation-Ichan-Qala": {
+        name: "Khiva Train Station → Ichan Qal'a",
+        name_uz: "Xiva temir yo'l vokzali → Ichan Qal'a",
+        name_ru: "Ж/д вокзал Хивы → Ичан-Кала",
+        name_tr: "Hive tren istasyonu → İçan Kale",
+        name_de: "Bahnhof Chiwa → Itschan-Kala",
+        pickup: { lat: 41.377249, lng: 60.376053 },
+        dropoff: { lat: 41.379259, lng: 60.356974 },
+        basePrice: 5,
+        hasStopover: false
+    },
+    "Urgench-Airport-Khiva": {
+        name: "Urgench Airport → Khiva",
+        name_uz: "Urganch aeroporti → Xiva",
+        name_ru: "Аэропорт Ургенча → Хива",
+        name_tr: "Urgenç Havalimanı → Hive",
+        name_de: "Flughafen Urgentsch → Chiwa",
+        pickup: { lat: 41.5840, lng: 60.6410 },
+        dropoff: { lat: 41.3789, lng: 60.3615 },
+        basePrice: 12,
+        hasStopover: false
+    },
+    "Urgench-trainstation-Khiva": {
+        name: "Urgench Station → Khiva",
+        name_uz: "Urganch temir yo'l vokzali → Xiva",
+        name_ru: "Ж/д вокзал Ургенча → Хива",
+        name_tr: "Urgenç tren istasyonu → Hive",
+        name_de: "Bahnhof Urgentsch → Chiwa",
+        pickup: { lat: 41.536914, lng: 60.633076 },
+        dropoff: { lat: 41.379259, lng: 60.356974 },
+        basePrice: 12,
+        hasStopover: false
+    },
+    "Khiva-KPP-Shavat": {
+        name: "Khiva → KPP Shavat",
+        name_uz: "Xiva → KPP Shovot",
+        name_ru: "Хива → КПП Шават",
+        name_tr: "Hive → Şavat kontrol noktası",
+        name_de: "Chiwa → Grenzposten Schawat",
+        pickup: { lat: 41.3789, lng: 60.3615 },
+        dropoff: { lat: 41.654985, lng: 60.294701 },
+        basePrice: 30,
+        hasStopover: false
+    },
+    "Khiva-Nukus": {
+        name: "Khiva → Nukus",
+        name_uz: "Xiva → Nukus",
+        name_ru: "Хива → Нукус",
+        name_tr: "Hive → Nukus",
+        name_de: "Chiwa → Nukus",
+        pickup: { lat: 41.3789, lng: 60.3615 },
+        dropoff: { lat: 42.4647, lng: 59.6153 },
+        basePrice: 50,
+        hasStopover: false
+    },
+    "Khiva-Muynak-Nukus": {
+        name: "Khiva → Muynak → Nukus → Khiva",
+        name_uz: "Xiva → Mo'ynoq → Nukus → Xiva",
+        name_ru: "Хива → Муйнак → Нукус → Хива",
+        name_tr: "Hive → Moynak → Nukus → Hive",
+        name_de: "Chiwa → Muynak → Nukus → Chiwa",
+        pickup: { lat: 41.379191, lng: 60.356898 },
+        dropoff: { lat: 41.3789, lng: 60.3615 },
+        basePrice: 90,
+        hasStopover: true,
+        stopovers: [
+            { 
+                lat: 43.7686, lng: 59.0214, 
+                name: "Muynak",
+                name_uz: "Mo'ynoq",
+                name_ru: "Муйнак",
+                name_tr: "Moynak",
+                name_de: "Muynak"
+            },
+            { 
+                lat: 42.458286, lng: 59.604422, 
+                name: "Nukus",
+                name_uz: "Nukus",
+                name_ru: "Нукус",
+                name_tr: "Nukus",
+                name_de: "Nukus"
+            }
+        ]
+    },
+    "Excursion": {
+        name: "Excursion: Ayaz Qal'a, Tupraq Qal'a → Khiva",
+        name_uz: "Ekskursiya: Ayaz Qal'a, Tuproq Qal'a → Xiva",
+        name_ru: "Экскурсия: Айяз-Кала, Тупрак-Кала → Хива",
+        name_tr: "Gezi: Ayaz Kale, Toprak Kale → Hive",
+        name_de: "Ausflug: Ayaz-Kala, Tuproq-Kala → Chiwa",
+        pickup: { lat: 41.379191, lng: 60.356898 },
+        dropoff: { lat: 41.3789, lng: 60.3615 },
+        basePrice: 40,
+        hasStopover: true,
+        stopovers: [
+            { 
+                lat: 42.018596, lng: 61.026362, 
+                name: "Ayaz Qal'a",
+                name_uz: "Ayaz Qal'a",
+                name_ru: "Айяз-Кала",
+                name_tr: "Ayaz Kale",
+                name_de: "Ayaz-Kala"
+            },
+            { 
+                lat: 41.923289, lng: 60.815298, 
+                name: "Tupraq Qal'a",
+                name_uz: "Tuproq Qal'a",
+                name_ru: "Тупрак-Кала",
+                name_tr: "Toprak Kale",
+                name_de: "Tuproq-Kala"
+            }
+        ]
+    },
+    "Khiva-Bukhara": {
+        name: "Khiva → Bukhara",
+        name_uz: "Xiva → Buxoro",
+        name_ru: "Хива → Бухара",
+        name_tr: "Hive → Buhara",
+        name_de: "Chiwa → Buchara",
+        pickup: { lat: 41.3789, lng: 60.3615 },
+        dropoff: { lat: 39.7678, lng: 64.4235 },
+        basePrice: 70,
+        hasStopover: false
+    }
+};
+
+// Get route from URL
+const params = new URLSearchParams(window.location.search);
+const slug = params.get("route") || "Khiva-trainstation-Ichan-Qala";
+const routeData = routes[slug];
+
+if (!routeData) {
+    alert("Route not found!");
+    window.location.href = "index.html";
+}
+
+// Car data with full translations
+const cars = {
+    cobalt: { 
+        name: "Chevrolet Cobalt", 
+        name_uz: "Chevrolet Cobalt",
+        name_ru: "Chevrolet Cobalt",
+        name_tr: "Chevrolet Cobalt",
+        name_de: "Chevrolet Cobalt",
+        multiplier: 1.0 
+    },
+    byd: { 
+        name: "BYD", 
+        name_uz: "BYD",
+        name_ru: "BYD",
+        name_tr: "BYD",
+        name_de: "BYD",
+        multiplier: 1.31 
+    },
+    lacetti: { 
+        name: "Chevrolet Lacetti", 
+        name_uz: "Chevrolet Lacetti",
+        name_ru: "Chevrolet Lacetti",
+        name_tr: "Chevrolet Lacetti",
+        name_de: "Chevrolet Lacetti",
+        multiplier: 1.0 
+    },
+    hyundai: { 
+        name: "Hyundai H-1", 
+        name_uz: "Hyundai H-1",
+        name_ru: "Hyundai H-1",
+        name_tr: "Hyundai H-1",
+        name_de: "Hyundai H-1",
+        multiplier: 2.24 
+    },
+    chery: { 
+        name: "Chery Tiggo 7 Pro", 
+        name_uz: "Chery Tiggo 7 Pro",
+        name_ru: "Chery Tiggo 7 Pro",
+        name_tr: "Chery Tiggo 7 Pro",
+        name_de: "Chery Tiggo 7 Pro",
+        multiplier: 1.31 
+    }
+};
+
+// Complete translations for all languages
+const translations = {
+    uz: {
+        // Page titles
+        taxiBooking: "Taksi bron qilish",
+        bookYourRide: "Avtomobilingizni bron qiling",
+        
+        // Booking steps
+        step1: "Yo'nalish tanlash",
+        step2: "Shaxsiy ma'lumotlar",
+        step3: "Tasdiqlash",
+        
+        // Route info
+        distance: "Masofa",
+        selectedRoute: "Tanlangan yo'nalish",
+        loadingRoute: "Yo'nalish yuklanmoqda",
+        duration: "Davomiylik",
+        estimatedPrice: "Taxminiy narx",
+        stopover: "To'xtash joylari",
+        
+        // Form labels
+        fullName: "To'liq ism",
+        enterFullName: "To'liq ismingizni kiriting",
+        phoneNumber: "Telefon raqami",
+        emailOptional: "Email (ixtiyoriy)",
+        carType: "Avtomobil turi",
+        selectCar: "Avtomobilni tanlang",
+        numPassengers: "Yo'lovchilar soni",
+        pickupDate: "Olib ketish sanasi",
+        pickupTime: "Olib ketish vaqti",
+        specialInstructions: "Maxsus ko'rsatmalar",
+        specialInstructionsPlaceholder: "Maxsus iltimoslar...",
+        
+        // Car options
+        carCobalt: "Chevrolet Cobalt (x1.0)",
+        carByd: "BYD (x1.31)",
+        carLacetti: "Chevrolet Lacetti (x1.0)",
+        carHyundai: "Hyundai H-1 (x2.24)",
+        carChery: "Chery Tiggo 7 Pro (x1.31)",
+        
+        // Button text
+        confirmBooking: "Bronni tasdiqlash",
+        backToHome: "Bosh sahifaga",
+        
+        // Success message
+        bookingConfirmed: "Bron muvaffaqiyatli!",
+        bookingSuccess: "Sizning broningiz qabul qilindi",
+        selectedCar: "Tanlangan avtomobil:",
+        driverContact: "Haydovchi siz bilan bog'lanadi",
+        
+        // Map markers
+        pickupLabel: "OLIB KETISH",
+        dropoffLabel: "TUSHISH",
+        stopoverLabel: "TO'XTASH",
+        
+        // Popup content
+        pickupPoint: "Olib ketish joyi",
+        dropoffPoint: "Tushish joyi",
+        stopoverPoint: "To'xtash joyi",
+        startJourney: "Sayohatingizni shu yerdan boshlang",
+        endJourney: "Sayohatingizning yakuniy nuqtasi",
+        stopOnRoute: "Yo'ldagi to'xtash joyi",
+        
+        // Error messages
+        selectCarError: "Iltimos, avtomobil tanlang!",
+        bookingError: "Bron yuborishda xatolik. Iltimos, qayta urinib ko'ring yoki telefon orqali bog'laning.",
+        routeError: "Yo'nalish topilmadi!",
+        
+        // Additional text
+        calculating: "hisoblanmoqda...",
+        km: "km",
+        mins: "minut",
+        persons: "kishi",
+        today: "Bugun",
+        tomorrow: "Ertaga",
+        selectDate: "Sanani tanlang",
+        selectTime: "Vaqtni tanlang",
+        
+        // Phone placeholder
+        phonePlaceholder: "+998 XX XXX XX XX",
+        emailPlaceholder: "sizning@email.com",
+        
+        // Price breakdown
+        basePrice: "Asosiy narx",
+        carMultiplier: "Avtomobil ko'paytmasi",
+        additionalPassengers: "Qo'shimcha yo'lovchilar",
+        totalPrice: "Jami narx",
+        
+        // Loading text
+        loading: "Yuklanmoqda...",
+        processing: "Qayta ishlanmoqda..."
+    },
+    
+    ru: {
+        // Page titles
+        taxiBooking: "Бронирование такси",
+        bookYourRide: "Забронируйте ваш автомобиль",
+        
+        // Booking steps
+        step1: "Выбор маршрута",
+        step2: "Личные данные",
+        step3: "Подтверждение",
+        
+        // Route info
+        distance: "Расстояние",
+        selectedRoute: "Выбранный маршрут",
+        loadingRoute: "Загрузка маршрута",
+        duration: "Длительность",
+        estimatedPrice: "Примерная цена",
+        stopover: "Остановки",
+        
+        // Form labels
+        fullName: "Полное имя",
+        enterFullName: "Введите ваше полное имя",
+        phoneNumber: "Номер телефона",
+        emailOptional: "Email (необязательно)",
+        carType: "Тип автомобиля",
+        selectCar: "Выберите автомобиль",
+        numPassengers: "Количество пассажиров",
+        pickupDate: "Дата подачи",
+        pickupTime: "Время подачи",
+        specialInstructions: "Особые пожелания",
+        specialInstructionsPlaceholder: "Особые пожелания...",
+        
+        // Car options
+        carCobalt: "Chevrolet Cobalt (x1.0)",
+        carByd: "BYD (x1.31)",
+        carLacetti: "Chevrolet Lacetti (x1.0)",
+        carHyundai: "Hyundai H-1 (x2.24)",
+        carChery: "Chery Tiggo 7 Pro (x1.31)",
+        
+        // Button text
+        confirmBooking: "Подтвердить бронирование",
+        backToHome: "На главную",
+        
+        // Success message
+        bookingConfirmed: "Бронирование успешно!",
+        bookingSuccess: "Ваше бронирование принято",
+        selectedCar: "Выбранный автомобиль:",
+        driverContact: "Водитель свяжется с вами",
+        
+        // Map markers
+        pickupLabel: "ЗАБРАТЬ",
+        dropoffLabel: "ВЫСАДКА",
+        stopoverLabel: "ОСТАНОВКА",
+        
+        // Popup content
+        pickupPoint: "Место посадки",
+        dropoffPoint: "Место высадки",
+        stopoverPoint: "Место остановки",
+        startJourney: "Начните ваше путешествие здесь",
+        endJourney: "Конечная точка вашего путешествия",
+        stopOnRoute: "Остановка на маршруте",
+        
+        // Error messages
+        selectCarError: "Пожалуйста, выберите автомобиль!",
+        bookingError: "Ошибка при отправке бронирования. Пожалуйста, попробуйте еще раз или свяжитесь по телефону.",
+        routeError: "Маршрут не найден!",
+        
+        // Additional text
+        calculating: "вычисляется...",
+        km: "км",
+        mins: "минут",
+        persons: "человек",
+        today: "Сегодня",
+        tomorrow: "Завтра",
+        selectDate: "Выберите дату",
+        selectTime: "Выберите время",
+        
+        // Phone placeholder
+        phonePlaceholder: "+998 XX XXX XX XX",
+        emailPlaceholder: "ваш@email.com",
+        
+        // Price breakdown
+        basePrice: "Базовая цена",
+        carMultiplier: "Коэффициент автомобиля",
+        additionalPassengers: "Дополнительные пассажиры",
+        totalPrice: "Общая цена",
+        
+        // Loading text
+        loading: "Загрузка...",
+        processing: "Обработка..."
+    },
+    
+    en: {
+        // Page titles
+        taxiBooking: "Taxi Booking",
+        bookYourRide: "Book your ride",
+        
+        // Booking steps
+        step1: "Route Selection",
+        step2: "Personal Details",
+        step3: "Confirmation",
+        
+        // Route info
+        distance: "Distance",
+        selectedRoute: "Selected Route",
+        loadingRoute: "Loading route",
+        duration: "Duration",
+        estimatedPrice: "Estimated Price",
+        stopover: "Stopovers",
+        
+        // Form labels
+        fullName: "Full Name",
+        enterFullName: "Enter your full name",
+        phoneNumber: "Phone Number",
+        emailOptional: "Email (Optional)",
+        carType: "Car Type",
+        selectCar: "Select Car",
+        numPassengers: "Number of Passengers",
+        pickupDate: "Pickup Date",
+        pickupTime: "Pickup Time",
+        specialInstructions: "Special Instructions",
+        specialInstructionsPlaceholder: "Any special requests...",
+        
+        // Car options
+        carCobalt: "Chevrolet Cobalt (x1.0)",
+        carByd: "BYD (x1.31)",
+        carLacetti: "Chevrolet Lacetti (x1.0)",
+        carHyundai: "Hyundai H-1 (x2.24)",
+        carChery: "Chery Tiggo 7 Pro (x1.31)",
+        
+        // Button text
+        confirmBooking: "Confirm Booking",
+        backToHome: "Back to Home",
+        
+        // Success message
+        bookingConfirmed: "Booking Confirmed!",
+        bookingSuccess: "Your booking has been accepted",
+        selectedCar: "Selected Car:",
+        driverContact: "We'll contact you shortly",
+        
+        // Map markers
+        pickupLabel: "PICKUP",
+        dropoffLabel: "DROPOFF",
+        stopoverLabel: "STOPOVER",
+        
+        // Popup content
+        pickupPoint: "Pickup Point",
+        dropoffPoint: "Dropoff Point",
+        stopoverPoint: "Stopover Point",
+        startJourney: "Start your journey here",
+        endJourney: "End of your journey",
+        stopOnRoute: "Stop point on your route",
+        
+        // Error messages
+        selectCarError: "Please select a car!",
+        bookingError: "Failed to send booking. Please try again or contact us by phone.",
+        routeError: "Route not found!",
+        
+        // Additional text
+        calculating: "calculating...",
+        km: "km",
+        mins: "mins",
+        persons: "persons",
+        today: "Today",
+        tomorrow: "Tomorrow",
+        selectDate: "Select date",
+        selectTime: "Select time",
+        
+        // Phone placeholder
+        phonePlaceholder: "+998 XX XXX XX XX",
+        emailPlaceholder: "your@email.com",
+        
+        // Price breakdown
+        basePrice: "Base Price",
+        carMultiplier: "Car Multiplier",
+        additionalPassengers: "Additional Passengers",
+        totalPrice: "Total Price",
+        
+        // Loading text
+        loading: "Loading...",
+        processing: "Processing..."
+    },
+    
+    tr: {
+        // Page titles
+        taxiBooking: "Taksi Rezervasyonu",
+        bookYourRide: "Yolculuğunuzu rezerve edin",
+        
+        // Booking steps
+        step1: "Rota Seçimi",
+        step2: "Kişisel Bilgiler",
+        step3: "Onaylama",
+        
+        // Route info
+        distance: "Mesafe",
+        selectedRoute: "Seçilen Rota",
+        loadingRoute: "Rota yükleniyor",
+        duration: "Süre",
+        estimatedPrice: "Tahmini Fiyat",
+        stopover: "Duraklar",
+        
+        // Form labels
+        fullName: "Tam Ad",
+        enterFullName: "Tam adınızı girin",
+        phoneNumber: "Telefon Numarası",
+        emailOptional: "E-posta (İsteğe Bağlı)",
+        carType: "Araç Tipi",
+        selectCar: "Araç Seçin",
+        numPassengers: "Yolcu Sayısı",
+        pickupDate: "Alınma Tarihi",
+        pickupTime: "Alınma Saati",
+        specialInstructions: "Özel Talimatlar",
+        specialInstructionsPlaceholder: "Özel istekler...",
+        
+        // Car options
+        carCobalt: "Chevrolet Cobalt (x1.0)",
+        carByd: "BYD (x1.31)",
+        carLacetti: "Chevrolet Lacetti (x1.0)",
+        carHyundai: "Hyundai H-1 (x2.24)",
+        carChery: "Chery Tiggo 7 Pro (x1.31)",
+        
+        // Button text
+        confirmBooking: "Rezervasyonu Onayla",
+        backToHome: "Ana Sayfaya Dön",
+        
+        // Success message
+        bookingConfirmed: "Rezervasyon Onaylandı!",
+        bookingSuccess: "Rezervasyonunuz kabul edildi",
+        selectedCar: "Seçilen Araç:",
+        driverContact: "Sizinle iletişime geçeceğiz",
+        
+        // Map markers
+        pickupLabel: "ALINMA",
+        dropoffLabel: "VARIŞ",
+        stopoverLabel: "DURAK",
+        
+        // Popup content
+        pickupPoint: "Alınma Noktası",
+        dropoffPoint: "Variş Noktası",
+        stopoverPoint: "Durak Noktası",
+        startJourney: "Yolculuğunuza buradan başlayın",
+        endJourney: "Yolculuğunuzun bitiş noktası",
+        stopOnRoute: "Rotadaki durak noktası",
+        
+        // Error messages
+        selectCarError: "Lütfen bir araç seçin!",
+        bookingError: "Rezervasyon gönderilirken hata oluştu. Lütfen tekrar deneyin veya telefonla bize ulaşın.",
+        routeError: "Rota bulunamadı!",
+        
+        // Additional text
+        calculating: "hesaplanıyor...",
+        km: "km",
+        mins: "dakika",
+        persons: "kişi",
+        today: "Bugün",
+        tomorrow: "Yarın",
+        selectDate: "Tarih seçin",
+        selectTime: "Saat seçin",
+        
+        // Phone placeholder
+        phonePlaceholder: "+998 XX XXX XX XX",
+        emailPlaceholder: "sizin@email.com",
+        
+        // Price breakdown
+        basePrice: "Temel Fiyat",
+        carMultiplier: "Araç Çarpanı",
+        additionalPassengers: "Ek Yolcular",
+        totalPrice: "Toplam Fiyat",
+        
+        // Loading text
+        loading: "Yükleniyor...",
+        processing: "İşleniyor..."
+    },
+    
+    de: {
+        // Page titles
+        taxiBooking: "Taxi Buchung",
+        bookYourRide: "Buchen Sie Ihre Fahrt",
+        
+        // Booking steps
+        step1: "Streckenauswahl",
+        step2: "Persönliche Daten",
+        step3: "Bestätigung",
+        
+        // Route info
+        distance: "Entfernung",
+        selectedRoute: "Ausgewählte Strecke",
+        loadingRoute: "Strecke wird geladen",
+        duration: "Dauer",
+        estimatedPrice: "Geschätzter Preis",
+        stopover: "Zwischenstopps",
+        
+        // Form labels
+        fullName: "Vollständiger Name",
+        enterFullName: "Geben Sie Ihren vollständigen Namen ein",
+        phoneNumber: "Telefonnummer",
+        emailOptional: "E-Mail (Optional)",
+        carType: "Autotyp",
+        selectCar: "Auto auswählen",
+        numPassengers: "Anzahl der Passagiere",
+        pickupDate: "Abholdatum",
+        pickupTime: "Abholzeit",
+        specialInstructions: "Besondere Anweisungen",
+        specialInstructionsPlaceholder: "Besondere Wünsche...",
+        
+        // Car options
+        carCobalt: "Chevrolet Cobalt (x1.0)",
+        carByd: "BYD (x1.31)",
+        carLacetti: "Chevrolet Lacetti (x1.0)",
+        carHyundai: "Hyundai H-1 (x2.24)",
+        carChery: "Chery Tiggo 7 Pro (x1.31)",
+        
+        // Button text
+        confirmBooking: "Buchung bestätigen",
+        backToHome: "Zurück zur Startseite",
+        
+        // Success message
+        bookingConfirmed: "Buchung bestätigt!",
+        bookingSuccess: "Ihre Buchung wurde angenommen",
+        selectedCar: "Ausgewähltes Auto:",
+        driverContact: "Wir werden Sie kontaktieren",
+        
+        // Map markers
+        pickupLabel: "ABHOLUNG",
+        dropoffLabel: "ANKUNFT",
+        stopoverLabel: "ZWISCHENSTOPP",
+        
+        // Popup content
+        pickupPoint: "Abholpunkt",
+        dropoffPoint: "Ankunftspunkt",
+        stopoverPoint: "Zwischenstopp-Punkt",
+        startJourney: "Beginnen Sie Ihre Reise hier",
+        endJourney: "Endpunkt Ihrer Reise",
+        stopOnRoute: "Stopppunkt auf Ihrer Route",
+        
+        // Error messages
+        selectCarError: "Bitte wählen Sie ein Auto!",
+        bookingError: "Fehler beim Senden der Buchung. Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.",
+        routeError: "Route nicht gefunden!",
+        
+        // Additional text
+        calculating: "wird berechnet...",
+        km: "km",
+        mins: "Minuten",
+        persons: "Personen",
+        today: "Heute",
+        tomorrow: "Morgen",
+        selectDate: "Datum auswählen",
+        selectTime: "Uhrzeit auswählen",
+        
+        // Phone placeholder
+        phonePlaceholder: "+998 XX XXX XX XX",
+        emailPlaceholder: "ihre@email.com",
+        
+        // Price breakdown
+        basePrice: "Grundpreis",
+        carMultiplier: "Auto-Multiplikator",
+        additionalPassengers: "Zusätzliche Passagiere",
+        totalPrice: "Gesamtpreis",
+        
+        // Loading text
+        loading: "Wird geladen...",
+        processing: "Wird verarbeitet..."
+    }
+};
+
+// Main initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Remove loading screen
+    setTimeout(() => {
+        const loadingScreen = document.querySelector('.loading-screen');
+        if (loadingScreen) loadingScreen.remove();
+    }, 1000);
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+        dateInput.min = today;
+        dateInput.value = today;
+    }
+
+    // Set default time to next hour
+    const now = new Date();
+    const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
+    const timeInput = document.getElementById('time');
+    if (timeInput) {
+        timeInput.value = `${nextHour.getHours().toString().padStart(2, '0')}:${nextHour.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    // Initialize booking
+    initBooking();
+
+    // Initialize language
+    setTimeout(() => {
+        initLanguage();
+    }, 300);
+});
+
+// Price calculation function
+function calculatePrice() {
+    const basePrice = routeData.basePrice;
+    const carSelect = document.getElementById('carType');
+    const passengersInput = document.getElementById('passengers');
+    
+    if (!carSelect || !passengersInput) return basePrice;
+    
+    const carValue = carSelect.value;
+    if (!carValue) return basePrice;
+    
+    const carMultiplier = cars[carValue]?.multiplier || 1.0;
+    const passengers = parseInt(passengersInput.value) || 1;
+    
+    // Price formula: base price × car multiplier + (passengers - 1) × $1
+    const additionalPassengers = Math.max(0, passengers - 1);
+    const finalPrice = (basePrice * carMultiplier) + additionalPassengers;
+    
+    return Math.round(finalPrice * 100) / 100; // Round to 2 decimals
+}
+
+// Update price display
+function updatePrice() {
+    const priceElement = document.getElementById('price');
+    if (!priceElement) return;
+    
+    const price = calculatePrice();
+    priceElement.textContent = `$${price.toFixed(2)}`;
+}
+
+// Language management
+function initLanguage() {
+    const langSelect = document.getElementById('langBooking');
+    const savedLang = localStorage.getItem('bookingLang') || 'en';
+
+    if (langSelect) {
+        langSelect.value = savedLang;
+        
+        setTimeout(() => {
+            setLanguage(savedLang);
+        }, 100);
+
+        langSelect.addEventListener('change', (e) => {
+            const newLang = e.target.value;
+            setLanguage(newLang);
+            localStorage.setItem('bookingLang', newLang);
         });
+    }
+}
 
-        document.addEventListener('keydown', function (e) {
-            if (
-                e.keyCode === 123 ||  // F12
-                (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
-                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
-                (e.ctrlKey && e.shiftKey && e.keyCode === 74) // Ctrl+Shift+J
-            ) {
-                e.preventDefault();
+function setLanguage(lang) {
+    const langData = translations[lang] || translations['en'];
+    const currentLang = lang;
+    
+    // Update all elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (key && langData[key]) {
+            element.textContent = langData[key];
+        }
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        if (key && langData[key]) {
+            element.setAttribute('placeholder', langData[key]);
+        }
+    });
+
+    // Update phone and email placeholders
+    const phoneInput = document.getElementById('phone');
+    const emailInput = document.getElementById('email');
+    
+    if (phoneInput) {
+        phoneInput.placeholder = langData.phonePlaceholder || '+998 XX XXX XX XX';
+    }
+    
+    if (emailInput) {
+        emailInput.placeholder = langData.emailPlaceholder || 'your@email.com';
+    }
+
+    // Update car select options
+    const carTypeSelect = document.getElementById('carType');
+    if (carTypeSelect) {
+        Array.from(carTypeSelect.options).forEach(option => {
+            const key = option.getAttribute('data-i18n');
+            if (key && langData[key]) {
+                option.textContent = langData[key];
             }
         });
+    }
 
-        // Global variables
-        let map, routingControl;
-        let totalDistance = 0;
-        let totalDuration = 0;
-
-        // Routes data with full translations
-        const routes = {
-            "Khiva-trainstation-Ichan-Qala": {
-                name: "Khiva Train Station → Ichan Qal'a",
-                name_uz: "Xiva temir yo'l vokzali → Ichan Qal'a",
-                name_ru: "Ж/д вокзал Хивы → Ичан-Кала",
-                name_tr: "Hive tren istasyonu → İçan Kale",
-                name_de: "Bahnhof Chiwa → Itschan-Kala",
-                pickup: { lat: 41.377249, lng: 60.376053 },
-                dropoff: { lat: 41.379259, lng: 60.356974 },
-                basePrice: 5,
-                hasStopover: false
-            },
-            "Urgench-Airport-Khiva": {
-                name: "Urgench Airport → Khiva",
-                name_uz: "Urganch aeroporti → Xiva",
-                name_ru: "Аэропорт Ургенча → Хива",
-                name_tr: "Urgenç Havalimanı → Hive",
-                name_de: "Flughafen Urgentsch → Chiwa",
-                pickup: { lat: 41.5840, lng: 60.6410 },
-                dropoff: { lat: 41.3789, lng: 60.3615 },
-                basePrice: 12,
-                hasStopover: false
-            },
-            "Urgench-trainstation-Khiva": {
-                name: "Urgench Station → Khiva",
-                name_uz: "Urganch temir yo'l vokzali → Xiva",
-                name_ru: "Ж/д вокзал Ургенча → Хива",
-                name_tr: "Urgenç tren istasyonu → Hive",
-                name_de: "Bahnhof Urgentsch → Chiwa",
-                pickup: { lat: 41.536914, lng: 60.633076 },
-                dropoff: { lat: 41.379259, lng: 60.356974 },
-                basePrice: 12,
-                hasStopover: false
-            },
-            "Khiva-KPP-Shavat": {
-                name: "Khiva → KPP Shavat",
-                name_uz: "Xiva → KPP Shovot",
-                name_ru: "Хива → КПП Шават",
-                name_tr: "Hive → Şavat kontrol noktası",
-                name_de: "Chiwa → Grenzposten Schawat",
-                pickup: { lat: 41.3789, lng: 60.3615 },
-                dropoff: { lat: 41.654985, lng: 60.294701 },
-                basePrice: 30,
-                hasStopover: false
-            },
-            "Khiva-Nukus": {
-                name: "Khiva → Nukus",
-                name_uz: "Xiva → Nukus",
-                name_ru: "Хива → Нукус",
-                name_tr: "Hive → Nukus",
-                name_de: "Chiwa → Nukus",
-                pickup: { lat: 41.3789, lng: 60.3615 },
-                dropoff: { lat: 42.4647, lng: 59.6153 },
-                basePrice: 50,
-                hasStopover: false
-            },
-            "Khiva-Muynak-Nukus": {
-                name: "Khiva → Muynak → Nukus → Khiva",
-                name_uz: "Xiva → Mo'ynoq → Nukus → Xiva",
-                name_ru: "Хива → Муйнак → Нукус → Хива",
-                name_tr: "Hive → Moynak → Nukus → Hive",
-                name_de: "Chiwa → Muynak → Nukus → Chiwa",
-                pickup: { lat: 41.3789, lng: 60.3615 },
-                dropoff: { lat: 41.3789, lng: 60.3615 },
-                basePrice: 90,
-                hasStopover: true,
-                stopovers: [
-                    {
-                        lat: 43.7686, lng: 59.0214,
-                        name: "Muynak",
-                        name_uz: "Mo'ynoq",
-                        name_ru: "Муйнак",
-                        name_tr: "Moynak",
-                        name_de: "Muynak"
-                    },
-                    {
-                        lat: 42.4647, lng: 59.6153,
-                        name: "Nukus",
-                        name_uz: "Nukus",
-                        name_ru: "Нукус",
-                        name_tr: "Nukus",
-                        name_de: "Nukus"
-                    }
-                ]
-            },
-            "Excursion": {
-                name: "Excursion: Ayaz Qal'a, Tupraq Qal'a → Khiva",
-                name_uz: "Ekskursiya: Ayaz Qal'a, Tuproq Qal'a → Xiva",
-                name_ru: "Экскурсия: Айяз-Кала, Тупрак-Кала → Хива",
-                name_tr: "Gezi: Ayaz Kale, Toprak Kale → Hive",
-                name_de: "Ausflug: Ayaz-Kala, Tuproq-Kala → Chiwa",
-                pickup: { lat: 41.3789, lng: 60.3615 },
-                dropoff: { lat: 41.3789, lng: 60.3615 },
-                basePrice: 40,
-                hasStopover: true,
-                stopovers: [
-                    {
-                        lat: 42.018596, lng: 61.026362,
-                        name: "Ayaz Qal'a",
-                        name_uz: "Ayaz Qal'a",
-                        name_ru: "Айяз-Кала",
-                        name_tr: "Ayaz Kale",
-                        name_de: "Ayaz-Kala"
-                    },
-                    {
-                        lat: 41.9500, lng: 61.1000,
-                        name: "Tupraq Qal'a",
-                        name_uz: "Tuproq Qal'a",
-                        name_ru: "Тупрак-Кала",
-                        name_tr: "Toprak Kale",
-                        name_de: "Tuproq-Kala"
-                    }
-                ]
-            },
-            "Khiva-Bukhara": {
-                name: "Khiva → Bukhara",
-                name_uz: "Xiva → Buxoro",
-                name_ru: "Хива → Бухара",
-                name_tr: "Hive → Buhara",
-                name_de: "Chiwa → Buchara",
-                pickup: { lat: 41.3789, lng: 60.3615 },
-                dropoff: { lat: 39.7678, lng: 64.4235 },
-                basePrice: 70,
-                hasStopover: false
-            }
-        };
-
-        // Get route from URL
-        const params = new URLSearchParams(window.location.search);
-        const slug = params.get("route") || "Khiva-trainstation-Ichan-Qala";
-        const routeData = routes[slug];
-
-        if (!routeData) {
-            alert("Route not found!");
-            window.location.href = "index.html";
+    // Update route name with translation
+    const routeNameElement = document.getElementById('routeName');
+    if (routeNameElement) {
+        const routeNameKey = `name_${currentLang}`;
+        const translatedRouteName = routeData[routeNameKey] || routeData.name;
+        
+        const routeNameSpan = routeNameElement.querySelector('span');
+        if (routeNameSpan) {
+            routeNameSpan.textContent = translatedRouteName;
+        } else {
+            routeNameElement.innerHTML = `<i class="fas fa-route"></i> <span>${translatedRouteName}</span>`;
         }
-
-        // Car data with full translations
-        const cars = {
-            cobalt: {
-                name: "Chevrolet Cobalt",
-                name_uz: "Chevrolet Cobalt",
-                name_ru: "Chevrolet Cobalt",
-                name_tr: "Chevrolet Cobalt",
-                name_de: "Chevrolet Cobalt",
-                multiplier: 1.0
-            },
-            byd: {
-                name: "BYD",
-                name_uz: "BYD",
-                name_ru: "BYD",
-                name_tr: "BYD",
-                name_de: "BYD",
-                multiplier: 1.31
-            },
-            lacetti: {
-                name: "Chevrolet Lacetti",
-                name_uz: "Chevrolet Lacetti",
-                name_ru: "Chevrolet Lacetti",
-                name_tr: "Chevrolet Lacetti",
-                name_de: "Chevrolet Lacetti",
-                multiplier: 1.0
-            },
-            hyundai: {
-                name: "Hyundai H-1",
-                name_uz: "Hyundai H-1",
-                name_ru: "Hyundai H-1",
-                name_tr: "Hyundai H-1",
-                name_de: "Hyundai H-1",
-                multiplier: 2.24
-            },
-            chery: {
-                name: "Chery Tiggo 7 Pro",
-                name_uz: "Chery Tiggo 7 Pro",
-                name_ru: "Chery Tiggo 7 Pro",
-                name_tr: "Chery Tiggo 7 Pro",
-                name_de: "Chery Tiggo 7 Pro",
-                multiplier: 1.31
-            }
-        };
-
-        // Complete translations for all languages
-        const translations = {
-            uz: {
-                // Page titles
-                taxiBooking: "Taksi bron qilish",
-                bookYourRide: "Avtomobilingizni bron qiling",
-
-                // Booking steps
-                step1: "Yo'nalish tanlash",
-                step2: "Shaxsiy ma'lumotlar",
-                step3: "Tasdiqlash",
-
-                // Route info
-                distance: "Masofa",
-                selectedRoute: "Tanlangan yo'nalish",
-                loadingRoute: "Yo'nalish yuklanmoqda",
-                duration: "Davomiylik",
-                estimatedPrice: "Taxminiy narx",
-                stopover: "To'xtash joylari",
-
-                // Form labels
-                fullName: "To'liq ism",
-                enterFullName: "To'liq ismingizni kiriting",
-                phoneNumber: "Telefon raqami",
-                emailOptional: "Email (ixtiyoriy)",
-                carType: "Avtomobil turi",
-                selectCar: "Avtomobilni tanlang",
-                numPassengers: "Yo'lovchilar soni",
-                pickupDate: "Olib ketish sanasi",
-                pickupTime: "Olib ketish vaqti",
-                specialInstructions: "Maxsus ko'rsatmalar",
-                specialInstructionsPlaceholder: "Maxsus iltimoslar...",
-
-                // Car options
-                carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.31)",
-                carLacetti: "Chevrolet Lacetti (x1.0)",
-                carHyundai: "Hyundai H-1 (x2.24)",
-                carChery: "Chery Tiggo 7 Pro (x1.31)",
-
-                // Button text
-                confirmBooking: "Bronni tasdiqlash",
-                backToHome: "Bosh sahifaga",
-
-                // Success message
-                bookingConfirmed: "Bron muvaffaqiyatli!",
-                bookingSuccess: "Sizning broningiz qabul qilindi",
-                selectedCar: "Tanlangan avtomobil:",
-                driverContact: "Haydovchi siz bilan bog'lanadi",
-
-                // Map markers
-                pickupLabel: "OLIB KETISH",
-                dropoffLabel: "TUSHISH",
-                stopoverLabel: "TO'XTASH",
-
-                // Popup content
-                pickupPoint: "Olib ketish joyi",
-                dropoffPoint: "Tushish joyi",
-                stopoverPoint: "To'xtash joyi",
-                startJourney: "Sayohatingizni shu yerdan boshlang",
-                endJourney: "Sayohatingizning yakuniy nuqtasi",
-                stopOnRoute: "Yo'ldagi to'xtash joyi",
-
-                // Error messages
-                selectCarError: "Iltimos, avtomobil tanlang!",
-                bookingError: "Bron yuborishda xatolik. Iltimos, qayta urinib ko'ring yoki telefon orqali bog'laning.",
-                routeError: "Yo'nalish topilmadi!",
-
-                // Additional text
-                calculating: "hisoblanmoqda...",
-                km: "km",
-                mins: "minut",
-                persons: "kishi",
-                today: "Bugun",
-                tomorrow: "Ertaga",
-                selectDate: "Sanani tanlang",
-                selectTime: "Vaqtni tanlang",
-
-                // Phone placeholder
-                phonePlaceholder: "+998 XX XXX XX XX",
-                emailPlaceholder: "sizning@email.com",
-
-                // Price breakdown
-                basePrice: "Asosiy narx",
-                carMultiplier: "Avtomobil ko'paytmasi",
-                additionalPassengers: "Qo'shimcha yo'lovchilar",
-                totalPrice: "Jami narx",
-
-                // Loading text
-                loading: "Yuklanmoqda...",
-                processing: "Qayta ishlanmoqda..."
-            },
-
-            ru: {
-                // Page titles
-                taxiBooking: "Бронирование такси",
-                bookYourRide: "Забронируйте ваш автомобиль",
-
-                // Booking steps
-                step1: "Выбор маршрута",
-                step2: "Личные данные",
-                step3: "Подтверждение",
-
-                // Route info
-                distance: "Расстояние",
-                selectedRoute: "Выбранный маршрут",
-                loadingRoute: "Загрузка маршрута",
-                duration: "Длительность",
-                estimatedPrice: "Примерная цена",
-                stopover: "Остановки",
-
-                // Form labels
-                fullName: "Полное имя",
-                enterFullName: "Введите ваше полное имя",
-                phoneNumber: "Номер телефона",
-                emailOptional: "Email (необязательно)",
-                carType: "Тип автомобиля",
-                selectCar: "Выберите автомобиль",
-                numPassengers: "Количество пассажиров",
-                pickupDate: "Дата подачи",
-                pickupTime: "Время подачи",
-                specialInstructions: "Особые пожелания",
-                specialInstructionsPlaceholder: "Особые пожелания...",
-
-                // Car options
-                carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.31)",
-                carLacetti: "Chevrolet Lacetti (x1.0)",
-                carHyundai: "Hyundai H-1 (x2.24)",
-                carChery: "Chery Tiggo 7 Pro (x1.31)",
-
-                // Button text
-                confirmBooking: "Подтвердить бронирование",
-                backToHome: "На главную",
-
-                // Success message
-                bookingConfirmed: "Бронирование успешно!",
-                bookingSuccess: "Ваше бронирование принято",
-                selectedCar: "Выбранный автомобиль:",
-                driverContact: "Водитель свяжется с вами",
-
-                // Map markers
-                pickupLabel: "ЗАБРАТЬ",
-                dropoffLabel: "ВЫСАДКА",
-                stopoverLabel: "ОСТАНОВКА",
-
-                // Popup content
-                pickupPoint: "Место посадки",
-                dropoffPoint: "Место высадки",
-                stopoverPoint: "Место остановки",
-                startJourney: "Начните ваше путешествие здесь",
-                endJourney: "Конечная точка вашего путешествия",
-                stopOnRoute: "Остановка на маршруте",
-
-                // Error messages
-                selectCarError: "Пожалуйста, выберите автомобиль!",
-                bookingError: "Ошибка при отправке бронирования. Пожалуйста, попробуйте еще раз или свяжитесь по телефону.",
-                routeError: "Маршрут не найден!",
-
-                // Additional text
-                calculating: "вычисляется...",
-                km: "км",
-                mins: "минут",
-                persons: "человек",
-                today: "Сегодня",
-                tomorrow: "Завтра",
-                selectDate: "Выберите дату",
-                selectTime: "Выберите время",
-
-                // Phone placeholder
-                phonePlaceholder: "+998 XX XXX XX XX",
-                emailPlaceholder: "ваш@email.com",
-
-                // Price breakdown
-                basePrice: "Базовая цена",
-                carMultiplier: "Коэффициент автомобиля",
-                additionalPassengers: "Дополнительные пассажиры",
-                totalPrice: "Общая цена",
-
-                // Loading text
-                loading: "Загрузка...",
-                processing: "Обработка..."
-            },
-
-            en: {
-                // Page titles
-                taxiBooking: "Taxi Booking",
-                bookYourRide: "Book your ride",
-
-                // Booking steps
-                step1: "Route Selection",
-                step2: "Personal Details",
-                step3: "Confirmation",
-
-                // Route info
-                distance: "Distance",
-                selectedRoute: "Selected Route",
-                loadingRoute: "Loading route",
-                duration: "Duration",
-                estimatedPrice: "Estimated Price",
-                stopover: "Stopovers",
-
-                // Form labels
-                fullName: "Full Name",
-                enterFullName: "Enter your full name",
-                phoneNumber: "Phone Number",
-                emailOptional: "Email (Optional)",
-                carType: "Car Type",
-                selectCar: "Select Car",
-                numPassengers: "Number of Passengers",
-                pickupDate: "Pickup Date",
-                pickupTime: "Pickup Time",
-                specialInstructions: "Special Instructions",
-                specialInstructionsPlaceholder: "Any special requests...",
-
-                // Car options
-                carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.31)",
-                carLacetti: "Chevrolet Lacetti (x1.0)",
-                carHyundai: "Hyundai H-1 (x2.24)",
-                carChery: "Chery Tiggo 7 Pro (x1.31)",
-
-                // Button text
-                confirmBooking: "Confirm Booking",
-                backToHome: "Back to Home",
-
-                // Success message
-                bookingConfirmed: "Booking Confirmed!",
-                bookingSuccess: "Your booking has been accepted",
-                selectedCar: "Selected Car:",
-                driverContact: "We'll contact you shortly",
-
-                // Map markers
-                pickupLabel: "PICKUP",
-                dropoffLabel: "DROPOFF",
-                stopoverLabel: "STOPOVER",
-
-                // Popup content
-                pickupPoint: "Pickup Point",
-                dropoffPoint: "Dropoff Point",
-                stopoverPoint: "Stopover Point",
-                startJourney: "Start your journey here",
-                endJourney: "End of your journey",
-                stopOnRoute: "Stop point on your route",
-
-                // Error messages
-                selectCarError: "Please select a car!",
-                bookingError: "Failed to send booking. Please try again or contact us by phone.",
-                routeError: "Route not found!",
-
-                // Additional text
-                calculating: "calculating...",
-                km: "km",
-                mins: "mins",
-                persons: "persons",
-                today: "Today",
-                tomorrow: "Tomorrow",
-                selectDate: "Select date",
-                selectTime: "Select time",
-
-                // Phone placeholder
-                phonePlaceholder: "+998 XX XXX XX XX",
-                emailPlaceholder: "your@email.com",
-
-                // Price breakdown
-                basePrice: "Base Price",
-                carMultiplier: "Car Multiplier",
-                additionalPassengers: "Additional Passengers",
-                totalPrice: "Total Price",
-
-                // Loading text
-                loading: "Loading...",
-                processing: "Processing..."
-            },
-
-            tr: {
-                // Page titles
-                taxiBooking: "Taksi Rezervasyonu",
-                bookYourRide: "Yolculuğunuzu rezerve edin",
-
-                // Booking steps
-                step1: "Rota Seçimi",
-                step2: "Kişisel Bilgiler",
-                step3: "Onaylama",
-
-                // Route info
-                distance: "Mesafe",
-                selectedRoute: "Seçilen Rota",
-                loadingRoute: "Rota yükleniyor",
-                duration: "Süre",
-                estimatedPrice: "Tahmini Fiyat",
-                stopover: "Duraklar",
-
-                // Form labels
-                fullName: "Tam Ad",
-                enterFullName: "Tam adınızı girin",
-                phoneNumber: "Telefon Numarası",
-                emailOptional: "E-posta (İsteğe Bağlı)",
-                carType: "Araç Tipi",
-                selectCar: "Araç Seçin",
-                numPassengers: "Yolcu Sayısı",
-                pickupDate: "Alınma Tarihi",
-                pickupTime: "Alınma Saati",
-                specialInstructions: "Özel Talimatlar",
-                specialInstructionsPlaceholder: "Özel istekler...",
-
-                // Car options
-                carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.31)",
-                carLacetti: "Chevrolet Lacetti (x1.0)",
-                carHyundai: "Hyundai H-1 (x2.24)",
-                carChery: "Chery Tiggo 7 Pro (x1.31)",
-
-                // Button text
-                confirmBooking: "Rezervasyonu Onayla",
-                backToHome: "Ana Sayfaya Dön",
-
-                // Success message
-                bookingConfirmed: "Rezervasyon Onaylandı!",
-                bookingSuccess: "Rezervasyonunuz kabul edildi",
-                selectedCar: "Seçilen Araç:",
-                driverContact: "Sizinle iletişime geçeceğiz",
-
-                // Map markers
-                pickupLabel: "ALINMA",
-                dropoffLabel: "VARIŞ",
-                stopoverLabel: "DURAK",
-
-                // Popup content
-                pickupPoint: "Alınma Noktası",
-                dropoffPoint: "Variş Noktası",
-                stopoverPoint: "Durak Noktası",
-                startJourney: "Yolculuğunuza buradan başlayın",
-                endJourney: "Yolculuğunuzun bitiş noktası",
-                stopOnRoute: "Rotadaki durak noktası",
-
-                // Error messages
-                selectCarError: "Lütfen bir araç seçin!",
-                bookingError: "Rezervasyon gönderilirken hata oluştu. Lütfen tekrar deneyin veya telefonla bize ulaşın.",
-                routeError: "Rota bulunamadı!",
-
-                // Additional text
-                calculating: "hesaplanıyor...",
-                km: "km",
-                mins: "dakika",
-                persons: "kişi",
-                today: "Bugün",
-                tomorrow: "Yarın",
-                selectDate: "Tarih seçin",
-                selectTime: "Saat seçin",
-
-                // Phone placeholder
-                phonePlaceholder: "+998 XX XXX XX XX",
-                emailPlaceholder: "sizin@email.com",
-
-                // Price breakdown
-                basePrice: "Temel Fiyat",
-                carMultiplier: "Araç Çarpanı",
-                additionalPassengers: "Ek Yolcular",
-                totalPrice: "Toplam Fiyat",
-
-                // Loading text
-                loading: "Yükleniyor...",
-                processing: "İşleniyor..."
-            },
-
-            de: {
-                // Page titles
-                taxiBooking: "Taxi Buchung",
-                bookYourRide: "Buchen Sie Ihre Fahrt",
-
-                // Booking steps
-                step1: "Streckenauswahl",
-                step2: "Persönliche Daten",
-                step3: "Bestätigung",
-
-                // Route info
-                distance: "Entfernung",
-                selectedRoute: "Ausgewählte Strecke",
-                loadingRoute: "Strecke wird geladen",
-                duration: "Dauer",
-                estimatedPrice: "Geschätzter Preis",
-                stopover: "Zwischenstopps",
-
-                // Form labels
-                fullName: "Vollständiger Name",
-                enterFullName: "Geben Sie Ihren vollständigen Namen ein",
-                phoneNumber: "Telefonnummer",
-                emailOptional: "E-Mail (Optional)",
-                carType: "Autotyp",
-                selectCar: "Auto auswählen",
-                numPassengers: "Anzahl der Passagiere",
-                pickupDate: "Abholdatum",
-                pickupTime: "Abholzeit",
-                specialInstructions: "Besondere Anweisungen",
-                specialInstructionsPlaceholder: "Besondere Wünsche...",
-
-                // Car options
-                carCobalt: "Chevrolet Cobalt (x1.0)",
-                carByd: "BYD (x1.31)",
-                carLacetti: "Chevrolet Lacetti (x1.0)",
-                carHyundai: "Hyundai H-1 (x2.24)",
-                carChery: "Chery Tiggo 7 Pro (x1.31)",
-
-                // Button text
-                confirmBooking: "Buchung bestätigen",
-                backToHome: "Zurück zur Startseite",
-
-                // Success message
-                bookingConfirmed: "Buchung bestätigt!",
-                bookingSuccess: "Ihre Buchung wurde angenommen",
-                selectedCar: "Ausgewähltes Auto:",
-                driverContact: "Wir werden Sie kontaktieren",
-
-                // Map markers
-                pickupLabel: "ABHOLUNG",
-                dropoffLabel: "ANKUNFT",
-                stopoverLabel: "ZWISCHENSTOPP",
-
-                // Popup content
-                pickupPoint: "Abholpunkt",
-                dropoffPoint: "Ankunftspunkt",
-                stopoverPoint: "Zwischenstopp-Punkt",
-                startJourney: "Beginnen Sie Ihre Reise hier",
-                endJourney: "Endpunkt Ihrer Reise",
-                stopOnRoute: "Stopppunkt auf Ihrer Route",
-
-                // Error messages
-                selectCarError: "Bitte wählen Sie ein Auto!",
-                bookingError: "Fehler beim Senden der Buchung. Bitte versuchen Sie es erneut oder kontaktieren Sie uns telefonisch.",
-                routeError: "Route nicht gefunden!",
-
-                // Additional text
-                calculating: "wird berechnet...",
-                km: "km",
-                mins: "Minuten",
-                persons: "Personen",
-                today: "Heute",
-                tomorrow: "Morgen",
-                selectDate: "Datum auswählen",
-                selectTime: "Uhrzeit auswählen",
-
-                // Phone placeholder
-                phonePlaceholder: "+998 XX XXX XX XX",
-                emailPlaceholder: "ihre@email.com",
-
-                // Price breakdown
-                basePrice: "Grundpreis",
-                carMultiplier: "Auto-Multiplikator",
-                additionalPassengers: "Zusätzliche Passagiere",
-                totalPrice: "Gesamtpreis",
-
-                // Loading text
-                loading: "Wird geladen...",
-                processing: "Wird verarbeitet..."
-            }
-        };
-
-        // Main initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            // Remove loading screen
-            setTimeout(() => {
-                const loadingScreen = document.querySelector('.loading-screen');
-                if (loadingScreen) loadingScreen.remove();
-            }, 1000);
-
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('date');
-            if (dateInput) {
-                dateInput.min = today;
-                dateInput.value = today;
-            }
-
-            // Set default time to next hour
-            const now = new Date();
-            const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
-            const timeInput = document.getElementById('time');
-            if (timeInput) {
-                timeInput.value = `${nextHour.getHours().toString().padStart(2, '0')}:${nextHour.getMinutes().toString().padStart(2, '0')}`;
-            }
-
-            // Initialize booking
-            initBooking();
-
-            // Initialize language
-            setTimeout(() => {
-                initLanguage();
-            }, 300);
-        });
-
-        // Price calculation function
-        function calculatePrice() {
-            const basePrice = routeData.basePrice;
-            const carSelect = document.getElementById('carType');
-            const passengersInput = document.getElementById('passengers');
-
-            if (!carSelect || !passengersInput) return basePrice;
-
-            const carValue = carSelect.value;
-            if (!carValue) return basePrice;
-
-            const carMultiplier = cars[carValue]?.multiplier || 1.0;
-            const passengers = parseInt(passengersInput.value) || 1;
-
-            // Price formula: base price × car multiplier + (passengers - 1) × $1
-            const additionalPassengers = Math.max(0, passengers - 1);
-            const finalPrice = (basePrice * carMultiplier) + additionalPassengers;
-
-            return Math.round(finalPrice * 100) / 100; // Round to 2 decimals
+    }
+
+    // Update stopover names if they exist
+    if (routeData.hasStopover && routeData.stopovers) {
+        const stopoverNames = routeData.stopovers.map(stopover => {
+            const stopoverKey = `name_${currentLang}`;
+            return stopover[stopoverKey] || stopover.name;
+        }).join(', ');
+        
+        const stopoverNameElement = document.getElementById('stopoverName');
+        if (stopoverNameElement) {
+            stopoverNameElement.textContent = stopoverNames;
         }
+    }
 
-        // Update price display
-        function updatePrice() {
-            const priceElement = document.getElementById('price');
-            if (!priceElement) return;
+    // Update distance and duration text
+    updateRouteInfoText(lang);
+    
+    // Update map markers
+    updateMapMarkers(lang);
+}
 
-            const price = calculatePrice();
-            priceElement.textContent = `$${price.toFixed(2)}`;
+function updateRouteInfoText(lang) {
+    const langData = translations[lang] || translations['en'];
+    
+    // Update distance element
+    const distanceElement = document.getElementById('distance');
+    if (distanceElement && totalDistance > 0) {
+        distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${totalDistance.toFixed(2)} ${langData.km || 'km'}`;
+    } else if (distanceElement) {
+        distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${langData.calculating || 'calculating...'}`;
+    }
+    
+    // Update route distance element
+    const routeDistanceElement = document.getElementById('routeDistance');
+    if (routeDistanceElement && totalDistance > 0) {
+        routeDistanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${totalDistance.toFixed(2)} ${langData.km || 'km'}`;
+    }
+    
+    // Update route duration element
+    const routeDurationElement = document.getElementById('routeDuration');
+    if (routeDurationElement && totalDuration > 0) {
+        routeDurationElement.innerHTML = `<i class="fas fa-clock"></i> ${langData.duration || 'Duration'}: ${totalDuration} ${langData.mins || 'mins'}`;
+    }
+}
+
+function updateMapMarkers(lang) {
+    const langData = translations[lang] || translations['en'];
+    
+    // Update marker labels if they exist
+    document.querySelectorAll('.marker-label').forEach(label => {
+        const currentText = label.textContent;
+        if (currentText.includes('PICKUP') || currentText.includes('OLIB') || currentText.includes('ЗАБРАТЬ') || currentText.includes('ALINMA') || currentText.includes('ABHOLUNG')) {
+            label.textContent = langData.pickupLabel || 'PICKUP';
+        } else if (currentText.includes('DROPOFF') || currentText.includes('TUSHISH') || currentText.includes('ВЫСАДКА') || currentText.includes('VARIŞ') || currentText.includes('ANKUNFT')) {
+            label.textContent = langData.dropoffLabel || 'DROPOFF';
+        } else if (currentText.includes('STOPOVER') || currentText.includes('TO\'XTASH') || currentText.includes('ОСТАНОВКА') || currentText.includes('DURAK') || currentText.includes('ZWISCHENSTOPP')) {
+            label.textContent = langData.stopoverLabel || 'STOPOVER';
         }
+    });
+}
 
-        // Language management
-        function initLanguage() {
-            const langSelect = document.getElementById('langBooking');
-            const savedLang = localStorage.getItem('bookingLang') || 'en';
+// Initialize booking
+function initBooking() {
+    console.log('Initializing booking for route:', slug);
+    
+    // Update route information
+    const routeNameElement = document.getElementById('routeName');
+    if (routeNameElement) {
+        routeNameElement.innerHTML = `<i class="fas fa-route"></i> <span>${routeData.name}</span>`;
+    }
 
-            if (langSelect) {
-                langSelect.value = savedLang;
-
-                setTimeout(() => {
-                    setLanguage(savedLang);
-                }, 100);
-
-                langSelect.addEventListener('change', (e) => {
-                    const newLang = e.target.value;
-                    setLanguage(newLang);
-                    localStorage.setItem('bookingLang', newLang);
-                });
-            }
+    // Show/hide stopover info
+    const stopoverElement = document.getElementById('routeStopover');
+    if (stopoverElement) {
+        if (routeData.hasStopover && routeData.stopovers) {
+            stopoverElement.style.display = 'block';
+            const stopoverNames = routeData.stopovers.map(s => s.name).join(', ');
+            document.getElementById('stopoverName').textContent = stopoverNames;
+        } else {
+            stopoverElement.style.display = 'none';
         }
+    }
 
-        function setLanguage(lang) {
-            const langData = translations[lang] || translations['en'];
-            const currentLang = lang;
+    // Initialize map
+    initMap();
 
-            // Update all elements with data-i18n
-            document.querySelectorAll('[data-i18n]').forEach(element => {
-                const key = element.getAttribute('data-i18n');
-                if (key && langData[key]) {
-                    element.textContent = langData[key];
-                }
-            });
+    // Update booking steps
+    updateSteps(1);
 
-            // Update placeholders
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-                const key = element.getAttribute('data-i18n-placeholder');
-                if (key && langData[key]) {
-                    element.setAttribute('placeholder', langData[key]);
-                }
-            });
+    // Set up event listeners for price calculation
+    const carTypeSelect = document.getElementById('carType');
+    const passengersInput = document.getElementById('passengers');
+    
+    if (carTypeSelect) {
+        carTypeSelect.addEventListener('change', updatePrice);
+        carTypeSelect.addEventListener('input', updatePrice);
+    }
+    
+    if (passengersInput) {
+        passengersInput.addEventListener('change', updatePrice);
+        passengersInput.addEventListener('input', updatePrice);
+        passengersInput.addEventListener('keyup', updatePrice);
+        
+        // Set min and max values
+        passengersInput.min = 1;
+        passengersInput.max = 10;
+    }
 
-            // Update phone and email placeholders
-            const phoneInput = document.getElementById('phone');
-            const emailInput = document.getElementById('email');
+    // Initial price calculation
+    updatePrice();
 
-            if (phoneInput) {
-                phoneInput.placeholder = langData.phonePlaceholder || '+998 XX XXX XX XX';
-            }
+    // Form submission
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', handleFormSubmit);
+    }
+}
 
-            if (emailInput) {
-                emailInput.placeholder = langData.emailPlaceholder || 'your@email.com';
-            }
+// Map initialization
+function initMap() {
+    console.log('Initializing map...');
+    
+    // Calculate map center
+    let allPoints = [routeData.pickup];
+    if (routeData.hasStopover && routeData.stopovers) {
+        allPoints = allPoints.concat(routeData.stopovers);
+    }
+    allPoints.push(routeData.dropoff);
+    
+    const lats = allPoints.map(p => p.lat);
+    const lngs = allPoints.map(p => p.lng);
+    const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
 
-            // Update car select options
-            const carTypeSelect = document.getElementById('carType');
-            if (carTypeSelect) {
-                Array.from(carTypeSelect.options).forEach(option => {
-                    const key = option.getAttribute('data-i18n');
-                    if (key && langData[key]) {
-                        option.textContent = langData[key];
-                    }
-                });
-            }
+    // Create map
+    map = L.map('map').setView([centerLat, centerLng], 10);
 
-            // Update route name with translation
-            const routeNameElement = document.getElementById('routeName');
-            if (routeNameElement) {
-                const routeNameKey = `name_${currentLang}`;
-                const translatedRouteName = routeData[routeNameKey] || routeData.name;
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
 
-                const routeNameSpan = routeNameElement.querySelector('span');
-                if (routeNameSpan) {
-                    routeNameSpan.textContent = translatedRouteName;
-                } else {
-                    routeNameElement.innerHTML = `<i class="fas fa-route"></i> <span>${translatedRouteName}</span>`;
-                }
-            }
+    // Add markers with current language
+    addMarkersToMap();
 
-            // Update stopover names if they exist
-            if (routeData.hasStopover && routeData.stopovers) {
-                const stopoverNames = routeData.stopovers.map(stopover => {
-                    const stopoverKey = `name_${currentLang}`;
-                    return stopover[stopoverKey] || stopover.name;
-                }).join(', ');
+    // Create route
+    createRoute();
 
-                const stopoverNameElement = document.getElementById('stopoverName');
-                if (stopoverNameElement) {
-                    stopoverNameElement.textContent = stopoverNames;
-                }
-            }
-
-            // Update distance and duration text
-            updateRouteInfoText(lang);
-
-            // Update map markers
-            updateMapMarkers(lang);
+    // Hide loading after 5 seconds
+    setTimeout(() => {
+        const mapLoading = document.getElementById('mapLoading');
+        if (mapLoading) {
+            mapLoading.style.display = 'none';
         }
+    }, 5000);
+}
 
-        function updateRouteInfoText(lang) {
-            const langData = translations[lang] || translations['en'];
-
-            // Update distance element
-            const distanceElement = document.getElementById('distance');
-            if (distanceElement && totalDistance > 0) {
-                distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${totalDistance.toFixed(2)} ${langData.km || 'km'}`;
-            } else if (distanceElement) {
-                distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${langData.calculating || 'calculating...'}`;
-            }
-
-            // Update route distance element
-            const routeDistanceElement = document.getElementById('routeDistance');
-            if (routeDistanceElement && totalDistance > 0) {
-                routeDistanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${totalDistance.toFixed(2)} ${langData.km || 'km'}`;
-            }
-
-            // Update route duration element
-            const routeDurationElement = document.getElementById('routeDuration');
-            if (routeDurationElement && totalDuration > 0) {
-                routeDurationElement.innerHTML = `<i class="fas fa-clock"></i> ${langData.duration || 'Duration'}: ${totalDuration} ${langData.mins || 'mins'}`;
-            }
-        }
-
-        function updateMapMarkers(lang) {
-            const langData = translations[lang] || translations['en'];
-
-            // Update marker labels if they exist
-            document.querySelectorAll('.marker-label').forEach(label => {
-                const currentText = label.textContent;
-                if (currentText.includes('PICKUP') || currentText.includes('OLIB') || currentText.includes('ЗАБРАТЬ') || currentText.includes('ALINMA') || currentText.includes('ABHOLUNG')) {
-                    label.textContent = langData.pickupLabel || 'PICKUP';
-                } else if (currentText.includes('DROPOFF') || currentText.includes('TUSHISH') || currentText.includes('ВЫСАДКА') || currentText.includes('VARIŞ') || currentText.includes('ANKUNFT')) {
-                    label.textContent = langData.dropoffLabel || 'DROPOFF';
-                } else if (currentText.includes('STOPOVER') || currentText.includes('TO\'XTASH') || currentText.includes('ОСТАНОВКА') || currentText.includes('DURAK') || currentText.includes('ZWISCHENSTOPP')) {
-                    label.textContent = langData.stopoverLabel || 'STOPOVER';
-                }
-            });
-        }
-
-        // Initialize booking
-        function initBooking() {
-            console.log('Initializing booking for route:', slug);
-
-            // Update route information
-            const routeNameElement = document.getElementById('routeName');
-            if (routeNameElement) {
-                routeNameElement.innerHTML = `<i class="fas fa-route"></i> <span>${routeData.name}</span>`;
-            }
-
-            // Show/hide stopover info
-            const stopoverElement = document.getElementById('routeStopover');
-            if (stopoverElement) {
-                if (routeData.hasStopover && routeData.stopovers) {
-                    stopoverElement.style.display = 'block';
-                    const stopoverNames = routeData.stopovers.map(s => s.name).join(', ');
-                    document.getElementById('stopoverName').textContent = stopoverNames;
-                } else {
-                    stopoverElement.style.display = 'none';
-                }
-            }
-
-            // Initialize map
-            initMap();
-
-            // Update booking steps
-            updateSteps(1);
-
-            // Set up event listeners for price calculation
-            const carTypeSelect = document.getElementById('carType');
-            const passengersInput = document.getElementById('passengers');
-
-            if (carTypeSelect) {
-                carTypeSelect.addEventListener('change', updatePrice);
-                carTypeSelect.addEventListener('input', updatePrice);
-            }
-
-            if (passengersInput) {
-                passengersInput.addEventListener('change', updatePrice);
-                passengersInput.addEventListener('input', updatePrice);
-                passengersInput.addEventListener('keyup', updatePrice);
-
-                // Set min and max values
-                passengersInput.min = 1;
-                passengersInput.max = 10;
-            }
-
-            // Initial price calculation
-            updatePrice();
-
-            // Form submission
-            const bookingForm = document.getElementById('bookingForm');
-            if (bookingForm) {
-                bookingForm.addEventListener('submit', handleFormSubmit);
-            }
-        }
-
-        // Map initialization
-        function initMap() {
-            console.log('Initializing map...');
-
-            // Calculate map center
-            let allPoints = [routeData.pickup];
-            if (routeData.hasStopover && routeData.stopovers) {
-                allPoints = allPoints.concat(routeData.stopovers);
-            }
-            allPoints.push(routeData.dropoff);
-
-            const lats = allPoints.map(p => p.lat);
-            const lngs = allPoints.map(p => p.lng);
-            const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
-            const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
-
-            // Create map
-            map = L.map('map').setView([centerLat, centerLng], 10);
-
-            // Add tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
-
-            // Add markers with current language
-            addMarkersToMap();
-
-            // Create route
-            createRoute();
-
-            // Hide loading after 5 seconds
-            setTimeout(() => {
-                const mapLoading = document.getElementById('mapLoading');
-                if (mapLoading) {
-                    mapLoading.style.display = 'none';
-                }
-            }, 5000);
-        }
-
-        // Add markers to map
-        function addMarkersToMap() {
-            const currentLang = localStorage.getItem('bookingLang') || 'en';
-            const langData = translations[currentLang] || translations['en'];
-
-            // Pickup marker
-            const pickupIcon = L.divIcon({
-                className: 'custom-marker-div',
-                html: `
+// Add markers to map
+function addMarkersToMap() {
+    const currentLang = localStorage.getItem('bookingLang') || 'en';
+    const langData = translations[currentLang] || translations['en'];
+    
+    // Pickup marker
+    const pickupIcon = L.divIcon({
+        className: 'custom-marker-div',
+        html: `
             <div class="custom-marker pickup-marker">
                 <i class="fas fa-map-marker-alt"></i>
             </div>
             <div class="marker-label">${langData.pickupLabel || 'PICKUP'}</div>
         `,
-                iconSize: [50, 70],
-                iconAnchor: [25, 65]
-            });
+        iconSize: [50, 70],
+        iconAnchor: [25, 65]
+    });
 
-            const pickupMarker = L.marker([routeData.pickup.lat, routeData.pickup.lng], {
-                icon: pickupIcon
-            }).addTo(map);
+    const pickupMarker = L.marker([routeData.pickup.lat, routeData.pickup.lng], { 
+        icon: pickupIcon 
+    }).addTo(map);
 
-            pickupMarker.bindPopup(`
+    pickupMarker.bindPopup(`
         <div class="custom-popup pickup-popup">
             <div class="popup-header">
                 <i class="fas fa-map-marker-alt"></i>
@@ -1768,27 +1767,27 @@
         </div>
     `);
 
-            // Stopover markers
-            if (routeData.hasStopover && routeData.stopovers) {
-                const stopoverIcon = L.divIcon({
-                    className: 'custom-marker-div',
-                    html: `
+    // Stopover markers
+    if (routeData.hasStopover && routeData.stopovers) {
+        const stopoverIcon = L.divIcon({
+            className: 'custom-marker-div',
+            html: `
                 <div class="custom-marker stopover-marker">
                     <i class="fas fa-pause-circle"></i>
                 </div>
                 <div class="marker-label">${langData.stopoverLabel || 'STOPOVER'}</div>
             `,
-                    iconSize: [50, 70],
-                    iconAnchor: [25, 65]
-                });
+            iconSize: [50, 70],
+            iconAnchor: [25, 65]
+        });
 
-                routeData.stopovers.forEach((stopover, index) => {
-                    const stopoverName = stopover[`name_${currentLang}`] || stopover.name;
-                    const stopoverMarker = L.marker([stopover.lat, stopover.lng], {
-                        icon: stopoverIcon
-                    }).addTo(map);
+        routeData.stopovers.forEach((stopover, index) => {
+            const stopoverName = stopover[`name_${currentLang}`] || stopover.name;
+            const stopoverMarker = L.marker([stopover.lat, stopover.lng], { 
+                icon: stopoverIcon 
+            }).addTo(map);
 
-                    stopoverMarker.bindPopup(`
+            stopoverMarker.bindPopup(`
                 <div class="custom-popup stopover-popup">
                     <div class="popup-header">
                         <i class="fas fa-pause-circle"></i>
@@ -1800,27 +1799,27 @@
                     </div>
                 </div>
             `);
-                });
-            }
+        });
+    }
 
-            // Dropoff marker
-            const dropoffIcon = L.divIcon({
-                className: 'custom-marker-div',
-                html: `
+    // Dropoff marker
+    const dropoffIcon = L.divIcon({
+        className: 'custom-marker-div',
+        html: `
             <div class="custom-marker dropoff-marker">
                 <i class="fas fa-flag-checkered"></i>
             </div>
             <div class="marker-label">${langData.dropoffLabel || 'DROPOFF'}</div>
         `,
-                iconSize: [50, 70],
-                iconAnchor: [25, 65]
-            });
+        iconSize: [50, 70],
+        iconAnchor: [25, 65]
+    });
 
-            const dropoffMarker = L.marker([routeData.dropoff.lat, routeData.dropoff.lng], {
-                icon: dropoffIcon
-            }).addTo(map);
+    const dropoffMarker = L.marker([routeData.dropoff.lat, routeData.dropoff.lng], { 
+        icon: dropoffIcon 
+    }).addTo(map);
 
-            dropoffMarker.bindPopup(`
+    dropoffMarker.bindPopup(`
         <div class="custom-popup dropoff-popup">
             <div class="popup-header">
                 <i class="fas fa-flag-checkered"></i>
@@ -1832,213 +1831,213 @@
             </div>
         </div>
     `);
+}
+
+// Create route on map
+function createRoute() {
+    const waypoints = [
+        L.latLng(routeData.pickup.lat, routeData.pickup.lng)
+    ];
+
+    // Add stopovers if any
+    if (routeData.hasStopover && routeData.stopovers) {
+        routeData.stopovers.forEach(stopover => {
+            waypoints.push(L.latLng(stopover.lat, stopover.lng));
+        });
+    }
+
+    waypoints.push(L.latLng(routeData.dropoff.lat, routeData.dropoff.lng));
+
+    routingControl = L.Routing.control({
+        waypoints: waypoints,
+        routeWhileDragging: false,
+        show: false,
+        addWaypoints: false,
+        lineOptions: {
+            styles: [{
+                color: '#ff6b35',
+                weight: 6,
+                opacity: 0.8
+            }]
+        },
+        createMarker: () => null,
+        showAlternatives: false,
+        fitSelectedRoutes: true
+    }).addTo(map);
+
+    // Handle route calculation
+    routingControl.on('routesfound', (e) => {
+        const route = e.routes[0];
+        totalDistance = route.summary.totalDistance / 1000; // Convert to km
+        totalDuration = Math.round(route.summary.totalTime / 60); // Convert to minutes
+
+        updateRouteInfo();
+        
+        // Hide loading
+        const mapLoading = document.getElementById('mapLoading');
+        if (mapLoading) {
+            mapLoading.style.display = 'none';
         }
+    });
 
-        // Create route on map
-        function createRoute() {
-            const waypoints = [
-                L.latLng(routeData.pickup.lat, routeData.pickup.lng)
-            ];
-
-            // Add stopovers if any
-            if (routeData.hasStopover && routeData.stopovers) {
-                routeData.stopovers.forEach(stopover => {
-                    waypoints.push(L.latLng(stopover.lat, stopover.lng));
-                });
-            }
-
-            waypoints.push(L.latLng(routeData.dropoff.lat, routeData.dropoff.lng));
-
-            routingControl = L.Routing.control({
-                waypoints: waypoints,
-                routeWhileDragging: false,
-                show: false,
-                addWaypoints: false,
-                lineOptions: {
-                    styles: [{
-                        color: '#ff6b35',
-                        weight: 6,
-                        opacity: 0.8
-                    }]
-                },
-                createMarker: () => null,
-                showAlternatives: false,
-                fitSelectedRoutes: true
-            }).addTo(map);
-
-            // Handle route calculation
-            routingControl.on('routesfound', (e) => {
-                const route = e.routes[0];
-                totalDistance = route.summary.totalDistance / 1000; // Convert to km
-                totalDuration = Math.round(route.summary.totalTime / 60); // Convert to minutes
-
-                updateRouteInfo();
-
-                // Hide loading
-                const mapLoading = document.getElementById('mapLoading');
-                if (mapLoading) {
-                    mapLoading.style.display = 'none';
-                }
-            });
-
-            // Handle errors
-            routingControl.on('routingerror', (e) => {
-                console.error('Routing error:', e.error);
-                const mapLoading = document.getElementById('mapLoading');
-                if (mapLoading) {
-                    mapLoading.style.display = 'none';
-                }
-
-                // Show fallback info
-                totalDistance = 0;
-                totalDuration = 0;
-                updateRouteInfo();
-            });
+    // Handle errors
+    routingControl.on('routingerror', (e) => {
+        console.error('Routing error:', e.error);
+        const mapLoading = document.getElementById('mapLoading');
+        if (mapLoading) {
+            mapLoading.style.display = 'none';
         }
+        
+        // Show fallback info
+        totalDistance = 0;
+        totalDuration = 0;
+        updateRouteInfo();
+    });
+}
 
-        // Update route information display
-        function updateRouteInfo() {
-            const currentLang = localStorage.getItem('bookingLang') || 'en';
-            const langData = translations[currentLang] || translations['en'];
-
-            const distanceElement = document.getElementById('distance');
-            const routeDistanceElement = document.getElementById('routeDistance');
-            const routeDurationElement = document.getElementById('routeDuration');
-
-            if (totalDistance > 0) {
-                const distanceText = `${totalDistance.toFixed(2)} ${langData.km || 'km'}`;
-                const durationText = `${totalDuration} ${langData.mins || 'mins'}`;
-
-                if (distanceElement) {
-                    distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${distanceText}`;
-                }
-
-                if (routeDistanceElement) {
-                    routeDistanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${distanceText}`;
-                }
-
-                if (routeDurationElement) {
-                    routeDurationElement.innerHTML = `<i class="fas fa-clock"></i> ${langData.duration || 'Duration'}: ${durationText}`;
-                }
-            } else {
-                if (distanceElement) {
-                    distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${langData.calculating || 'calculating...'}`;
-                }
-            }
+// Update route information display
+function updateRouteInfo() {
+    const currentLang = localStorage.getItem('bookingLang') || 'en';
+    const langData = translations[currentLang] || translations['en'];
+    
+    const distanceElement = document.getElementById('distance');
+    const routeDistanceElement = document.getElementById('routeDistance');
+    const routeDurationElement = document.getElementById('routeDuration');
+    
+    if (totalDistance > 0) {
+        const distanceText = `${totalDistance.toFixed(2)} ${langData.km || 'km'}`;
+        const durationText = `${totalDuration} ${langData.mins || 'mins'}`;
+        
+        if (distanceElement) {
+            distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${distanceText}`;
         }
-
-        // Update booking steps
-        function updateSteps(stepNumber) {
-            const steps = document.querySelectorAll('.step');
-            steps.forEach((step, index) => {
-                if (index < stepNumber) {
-                    step.classList.add('active');
-                } else {
-                    step.classList.remove('active');
-                }
-            });
+        
+        if (routeDistanceElement) {
+            routeDistanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${distanceText}`;
         }
-
-        // Form submission handler
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-
-            // Validate car selection
-            const carType = document.getElementById('carType').value;
-            if (!carType) {
-                const currentLang = localStorage.getItem('bookingLang') || 'en';
-                const langData = translations[currentLang] || translations['en'];
-                alert(langData.selectCarError || 'Please select a car!');
-                return;
-            }
-
-            // Show loading state
-            const submitBtn = document.querySelector('.submit-btn');
-            const originalContent = submitBtn.innerHTML;
-            const currentLang = localStorage.getItem('bookingLang') || 'en';
-            const langData = translations[currentLang] || translations['en'];
-
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.processing || 'Processing...'}`;
-            submitBtn.disabled = true;
-
-            // Collect form data
-            const passengers = parseInt(document.getElementById('passengers').value) || 1;
-            const car = cars[carType];
-            const finalPrice = calculatePrice();
-
-            // Get translated car name
-            const carNameKey = `name_${currentLang}`;
-            const translatedCarName = car[carNameKey] || car.name;
-
-            // Get translated route name
-            const routeNameKey = `name_${currentLang}`;
-            const translatedRouteName = routeData[routeNameKey] || routeData.name;
-
-            // Get translated stopover names
-            let translatedStopovers = '';
-            if (routeData.hasStopover && routeData.stopovers) {
-                translatedStopovers = routeData.stopovers.map(stopover => {
-                    const stopoverKey = `name_${currentLang}`;
-                    return stopover[stopoverKey] || stopover.name;
-                }).join(', ');
-            }
-
-            const formData = {
-                name: document.getElementById('name').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                email: document.getElementById('email').value.trim() || langData.emailOptional,
-                passengers: passengers,
-                date: document.getElementById('date').value,
-                time: document.getElementById('time').value,
-                notes: document.getElementById('notes').value.trim() || langData.specialInstructionsPlaceholder,
-                route: translatedRouteName,
-                distance: totalDistance.toFixed(2),
-                duration: totalDuration,
-                car: translatedCarName,
-                carMultiplier: car.multiplier,
-                basePrice: routeData.basePrice,
-                additionalPassengers: Math.max(0, passengers - 1),
-                additionalPrice: Math.max(0, passengers - 1) * 1,
-                finalPrice: finalPrice,
-                stopovers: translatedStopovers,
-                language: currentLang
-            };
-
-            // Update success message with selected car
-            const selectedCarName = document.getElementById('selectedCarName');
-            if (selectedCarName) {
-                selectedCarName.textContent = formData.car;
-            }
-
-            try {
-                // Send to Telegram
-                await sendToTelegram(formData);
-
-                // Show success message
-                document.getElementById('overlay').classList.add('show');
-                document.getElementById('successMessage').classList.add('show');
-                updateSteps(3);
-
-            } catch (error) {
-                console.error('Booking error:', error);
-                alert(langData.bookingError || 'Failed to send booking. Please try again or contact us by phone.');
-            } finally {
-                // Restore button state
-                submitBtn.innerHTML = originalContent;
-                submitBtn.disabled = false;
-            }
+        
+        if (routeDurationElement) {
+            routeDurationElement.innerHTML = `<i class="fas fa-clock"></i> ${langData.duration || 'Duration'}: ${durationText}`;
         }
+    } else {
+        if (distanceElement) {
+            distanceElement.innerHTML = `<i class="fas fa-road"></i> ${langData.distance || 'Distance'}: ${langData.calculating || 'calculating...'}`;
+        }
+    }
+}
 
-        // Send booking to Telegram
-        async function sendToTelegram(formData) {
-            const botToken = "8529581902:AAHBxCsvUYa8WT5y-i2AFCmeAmYNhwOha7w";
-            const chatId = "7579886970";
+// Update booking steps
+function updateSteps(stepNumber) {
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+        if (index < stepNumber) {
+            step.classList.add('active');
+        } else {
+            step.classList.remove('active');
+        }
+    });
+}
 
-            // Create message based on language
-            let message = '';
+// Form submission handler
+async function handleFormSubmit(e) {
+    e.preventDefault();
 
-            if (formData.language === 'uz') {
-                message = `
+    // Validate car selection
+    const carType = document.getElementById('carType').value;
+    if (!carType) {
+        const currentLang = localStorage.getItem('bookingLang') || 'en';
+        const langData = translations[currentLang] || translations['en'];
+        alert(langData.selectCarError || 'Please select a car!');
+        return;
+    }
+
+    // Show loading state
+    const submitBtn = document.querySelector('.submit-btn');
+    const originalContent = submitBtn.innerHTML;
+    const currentLang = localStorage.getItem('bookingLang') || 'en';
+    const langData = translations[currentLang] || translations['en'];
+    
+    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.processing || 'Processing...'}`;
+    submitBtn.disabled = true;
+
+    // Collect form data
+    const passengers = parseInt(document.getElementById('passengers').value) || 1;
+    const car = cars[carType];
+    const finalPrice = calculatePrice();
+    
+    // Get translated car name
+    const carNameKey = `name_${currentLang}`;
+    const translatedCarName = car[carNameKey] || car.name;
+    
+    // Get translated route name
+    const routeNameKey = `name_${currentLang}`;
+    const translatedRouteName = routeData[routeNameKey] || routeData.name;
+    
+    // Get translated stopover names
+    let translatedStopovers = '';
+    if (routeData.hasStopover && routeData.stopovers) {
+        translatedStopovers = routeData.stopovers.map(stopover => {
+            const stopoverKey = `name_${currentLang}`;
+            return stopover[stopoverKey] || stopover.name;
+        }).join(', ');
+    }
+
+    const formData = {
+        name: document.getElementById('name').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim() || langData.emailOptional,
+        passengers: passengers,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        notes: document.getElementById('notes').value.trim() || langData.specialInstructionsPlaceholder,
+        route: translatedRouteName,
+        distance: totalDistance.toFixed(2),
+        duration: totalDuration,
+        car: translatedCarName,
+        carMultiplier: car.multiplier,
+        basePrice: routeData.basePrice,
+        additionalPassengers: Math.max(0, passengers - 1),
+        additionalPrice: Math.max(0, passengers - 1) * 1,
+        finalPrice: finalPrice,
+        stopovers: translatedStopovers,
+        language: currentLang
+    };
+
+    // Update success message with selected car
+    const selectedCarName = document.getElementById('selectedCarName');
+    if (selectedCarName) {
+        selectedCarName.textContent = formData.car;
+    }
+
+    try {
+        // Send to Telegram
+        await sendToTelegram(formData);
+        
+        // Show success message
+        document.getElementById('overlay').classList.add('show');
+        document.getElementById('successMessage').classList.add('show');
+        updateSteps(3);
+        
+    } catch (error) {
+        console.error('Booking error:', error);
+        alert(langData.bookingError || 'Failed to send booking. Please try again or contact us by phone.');
+    } finally {
+        // Restore button state
+        submitBtn.innerHTML = originalContent;
+        submitBtn.disabled = false;
+    }
+}
+
+// Send booking to Telegram
+async function sendToTelegram(formData) {
+    const botToken = "8529581902:AAHBxCsvUYa8WT5y-i2AFCmeAmYNhwOha7w";
+    const chatId = "7579886970";
+    
+    // Create message based on language
+    let message = '';
+    
+    if (formData.language === 'uz') {
+        message = `
 🚖 *YANGI BRON*
 ━━━━━━━━━━━━━━━━
 📍 *Yo'nalish:* ${formData.route}
@@ -2063,8 +2062,8 @@ ${formData.stopovers ? `🛑 *To'xtash joylari:* ${formData.stopovers}\n` : ''}
 📝 *Eslatma:* ${formData.notes}
 ━━━━━━━━━━━━━━━━
 `;
-            } else if (formData.language === 'ru') {
-                message = `
+    } else if (formData.language === 'ru') {
+        message = `
 🚖 *НОВОЕ БРОНИРОВАНИЕ*
 ━━━━━━━━━━━━━━━━
 📍 *Маршрут:* ${formData.route}
@@ -2089,8 +2088,8 @@ ${formData.stopovers ? `🛑 *Остановки:* ${formData.stopovers}\n` : ''
 📝 *Примечания:* ${formData.notes}
 ━━━━━━━━━━━━━━━━
 `;
-            } else if (formData.language === 'tr') {
-                message = `
+    } else if (formData.language === 'tr') {
+        message = `
 🚖 *YENİ REZERVASYON*
 ━━━━━━━━━━━━━━━━
 📍 *Rota:* ${formData.route}
@@ -2115,8 +2114,8 @@ ${formData.stopovers ? `🛑 *Duraklar:* ${formData.stopovers}\n` : ''}
 📝 *Notlar:* ${formData.notes}
 ━━━━━━━━━━━━━━━━
 `;
-            } else if (formData.language === 'de') {
-                message = `
+    } else if (formData.language === 'de') {
+        message = `
 🚖 *NEUE BUCHUNG*
 ━━━━━━━━━━━━━━━━
 📍 *Route:* ${formData.route}
@@ -2141,9 +2140,9 @@ ${formData.stopovers ? `🛑 *Zwischenstopps:* ${formData.stopovers}\n` : ''}
 📝 *Notizen:* ${formData.notes}
 ━━━━━━━━━━━━━━━━
 `;
-            } else {
-                // English (default)
-                message = `
+    } else {
+        // English (default)
+        message = `
 🚖 *NEW BOOKING*
 ━━━━━━━━━━━━━━━━
 📍 *Route:* ${formData.route}
@@ -2168,73 +2167,72 @@ ${formData.stopovers ? `🛑 *Stopovers:* ${formData.stopovers}\n` : ''}
 📝 *Notes:* ${formData.notes}
 ━━━━━━━━━━━━━━━━
 `;
-            }
+    }
 
-            try {
-                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message.trim(),
-                        parse_mode: 'Markdown'
-                    })
-                });
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: message.trim(),
+                parse_mode: 'Markdown'
+            })
+        });
 
-                if (!response.ok) {
-                    throw new Error('Telegram API error');
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Telegram send error:', error);
-                throw error;
-            }
+        if (!response.ok) {
+            throw new Error('Telegram API error');
         }
 
-        // Close success modal
-        function closeSuccess() {
-            document.getElementById('overlay').classList.remove('show');
-            document.getElementById('successMessage').classList.remove('show');
-            window.location.href = "index.html";
+        return await response.json();
+    } catch (error) {
+        console.error('Telegram send error:', error);
+        throw error;
+    }
+}
+
+// Close success modal
+function closeSuccess() {
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('successMessage').classList.remove('show');
+    window.location.href = "index.html";
+}
+
+// Add animation to form inputs
+document.querySelectorAll('input, select').forEach(input => {
+    input.addEventListener('focus', function () {
+        this.parentElement.classList.add('focused');
+    });
+    input.addEventListener('blur', function () {
+        if (!this.value) {
+            this.parentElement.classList.remove('focused');
         }
+    });
+});
 
-        // Add animation to form inputs
-        document.querySelectorAll('input, select').forEach(input => {
-            input.addEventListener('focus', function () {
-                this.parentElement.classList.add('focused');
-            });
-            input.addEventListener('blur', function () {
-                if (!this.value) {
-                    this.parentElement.classList.remove('focused');
-                }
-            });
-        });
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') {
+        const bookingForm = document.getElementById('bookingForm');
+        if (bookingForm) {
+            bookingForm.dispatchEvent(new Event('submit'));
+        }
+    }
+});
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                const bookingForm = document.getElementById('bookingForm');
-                if (bookingForm) {
-                    bookingForm.dispatchEvent(new Event('submit'));
-                }
-            }
-        });
+// Real-time price updates
+document.addEventListener('input', function(e) {
+    if (e.target.id === 'passengers' || e.target.id === 'carType') {
+        updatePrice();
+    }
+});
 
-        // Real-time price updates
-        document.addEventListener('input', function (e) {
-            if (e.target.id === 'passengers' || e.target.id === 'carType') {
-                updatePrice();
-            }
-        });
-
-        // Initialize price on page load
-        setTimeout(() => {
-            updatePrice();
-        }, 500);
+// Initialize price on page load
+setTimeout(() => {
+    updatePrice();
+}, 500);
     </script>
 </body>
-
 </html>
